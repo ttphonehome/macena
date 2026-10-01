@@ -35,6 +35,12 @@
         // Never leave the page hidden if a script fails to load.
         if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
           root.classList.add("is-loading")
+          // Full intro once per session (and not when deep-linking to a section)
+          var seen = false
+          try {
+            seen = sessionStorage.getItem("mc-intro") === "1"
+          } catch (e) {}
+          if (seen || location.hash) root.classList.add("is-repeat")
           setTimeout(function () {
             root.classList.remove("is-loading")
           }, 6000)
@@ -44,6 +50,31 @@
   </head>
   <body>
     <a class="skip-link" href="#about">Skip to content</a>
+
+    <!-- Landing intro: JOSE ▢ MACENA, words close in around a flicking image,
+         then the image flies into the hero preview box -->
+    <div class="intro" aria-hidden="true" data-intro>
+      <div class="intro__row" data-intro-row>
+        <span class="intro__word"
+          ><span data-intro-letter>J</span><span data-intro-letter>O</span
+          ><span data-intro-letter>S</span><span data-intro-letter>E</span></span
+        >
+        <div class="intro__media" data-intro-media>
+          <img src="assets/img/macena-coast-900.jpg" alt="" />
+          <img src="assets/img/work-02-900.jpg" alt="" />
+          <img src="assets/img/work-03-900.jpg" alt="" />
+          <img src="assets/img/work-04-900.jpg" alt="" />
+        </div>
+        <span class="intro__word"
+          ><span data-intro-letter>M</span><span data-intro-letter>A</span
+          ><span data-intro-letter>C</span><span data-intro-letter>E</span
+          ><span data-intro-letter>N</span><span data-intro-letter>A</span></span
+        >
+      </div>
+      <p class="intro__count" data-intro-count>
+        <span>LOADING</span> <span data-intro-count-out>000</span>
+      </p>
+    </div>
 
     <header class="site-header" data-header>
       <nav class="site-header__nav" aria-label="Primary">
@@ -69,13 +100,6 @@
       <section class="hero" id="work" aria-label="Selected work" data-hero>
         <div class="hero__stage">
           <div class="hero__target" aria-hidden="true" data-hero-target></div>
-
-          <!-- Landing intro: two panels close over the preview box, then part -->
-          <div class="hero__curtain" aria-hidden="true" data-curtain>
-            <span class="hero__curtain-panel hero__curtain-panel--top"></span>
-            <span class="hero__curtain-panel hero__curtain-panel--bottom"></span>
-            <p class="hero__count"><span data-count-out>000</span></p>
-          </div>
 
           <div class="hero__frame" data-hero-frame>
             <div class="hero__slides" data-hero-slides>

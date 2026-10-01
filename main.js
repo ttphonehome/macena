@@ -598,145 +598,135 @@
   }
 
   /**
-   * Landing intro
-   *  A. Loading: the preview box is closed to a thin slit by two white
-   *     panels; the projects flick behind it while a counter tracks
-   *     real font + image loading (with a minimum duration).
-   *  B. Reveal: counter exits, the slit opens to the full preview,
-   *     MACENA rises letter by letter, JOSE pops into the C, the
-   *     availability line wipes in and the nav drops down.
-   *  Repeat visits in the same session skip A and play a shorter B.
+   * Landing intro (full version once per session)
+   *  1. Overlay: "JOSE ▢ MACENA". Letters rise while a wide image box
+   *     opens between the words and flicks through the projects; a
+   *     counter tracks real font + image loading (1.8s min, 3.5s cap).
+   *  2. Close-in: the image shrinks to an inline size, pulling the
+   *     words together around it.
+   *  3. Handoff: the words exit, the image flies into the hero preview
+   *     box and the overlay dissolves while the hero plays its reveal.
+   *  Repeat visits and deep links skip 1–3 and play the hero reveal only.
    */
   function playIntro() {
-    const curtain = $("[data-curtain]")
-    const panels = $$(".hero__curtain-panel", curtain)
-    const count = $(".hero__count", curtain)
-    const countOut = $("[data-count-out]", curtain)
+    const overlay = $("[data-intro]")
+    const row = $("[data-intro-row]", overlay)
+    const media = $("[data-intro-media]", overlay)
+    const mediaImgs = $$("img", media)
+    const introLetters = $$("[data-intro-letter]", overlay)
+    const countWrap = $("[data-intro-count]", overlay)
+    const countOut = $("[data-intro-count-out]", overlay)
+
     const letters = $$("[data-letter]", hero)
     const name = $(".wordmark__name", hero)
     const availability = $(".availability", hero)
     const navLinks = $$(".site-header__nav > a", header)
 
-    let seen = false
-    try {
-      seen = sessionStorage.getItem("mc-intro") === "1"
-    } catch (_) {}
+    const full = !root.classList.contains("is-repeat")
 
-    // Start at the top with scrolling locked (unless arriving on a #section)
-    const deepLink = Boolean(location.hash)
-    if (!deepLink) {
+    if (full) {
       if ("scrollRestoration" in history) history.scrollRestoration = "manual"
       window.scrollTo(0, 0)
       lenis?.scrollTo(0, { immediate: true })
       lenis?.stop()
       root.style.overflow = "hidden"
+      overlay.classList.add("is-active")
     }
 
-    // Take over the CSS pre-states with inline GSAP state
-    gsap.set(panels, { scaleY: 1 })
-    // y: 0 discards the px offset GSAP parses from the CSS pre-state
+    // Hero pre-states. y: 0 discards the px offset GSAP parses from the
+    // CSS translateY(110%) pre-state, so yPercent alone drives the letters.
     gsap.set(letters, { y: 0, yPercent: 110, rotate: 6 })
     gsap.set(name, { autoAlpha: 0, scale: 0.4 })
     gsap.set(availability, { autoAlpha: 1, clipPath: "inset(0% 100% 0% 0%)" })
     gsap.set(navLinks, { autoAlpha: 0, yPercent: -120 })
     root.classList.remove("is-loading")
 
-    // Fast flicker through the projects behind the slit
-    let flick = null
-    const startFlicker = () => {
-      const step = () => {
-        index = (index + 1) % total
-        restack(index)
-        flick = gsap.delayedCall(0.11, step)
-      }
-      flick = gsap.delayedCall(0.11, step)
-    }
-    const stopFlicker = () => {
-      flick?.kill()
-      index = 0
-      restack(0)
-      writeCopy(0)
-    }
-
     const finish = () => {
       introDone = true
       root.style.overflow = ""
       lenis?.start()
-      gsap.set(curtain, { display: "none" })
+      overlay.classList.remove("is-active")
+      overlay.style.display = "none"
       try {
         sessionStorage.setItem("mc-intro", "1")
       } catch (_) {}
     }
 
-    const reveal = (short) => {
-      const tl = gsap.timeline({ onComplete: finish })
-      const s = short ? 0.75 : 1 // compress timings on repeat visits
-
-      if (!short) {
-        tl.to(countOut, { yPercent: -110, duration: 0.5, ease: "power3.in" }, 0)
-        tl.call(stopFlicker, null, 0.25)
-      }
-
-      tl.to(
-        panels,
-        { scaleY: 0, duration: 1.2 * s, ease: "expo.inOut" },
-        short ? 0 : 0.2,
-      )
+    const heroReveal = (short) => {
+      const s = short ? 0.75 : 1
+      return gsap
+        .timeline()
         .to(
           letters,
-          {
-            yPercent: 0,
-            rotate: 0,
-            duration: 1.4 * s,
-            ease: "expo.out",
-            stagger: 0.06 * s,
-          },
-          short ? 0.15 : 0.55,
+          { yPercent: 0, rotate: 0, duration: 1.4 * s, ease: "expo.out", stagger: 0.06 * s },
+          0,
         )
         .to(
           availability,
           { clipPath: "inset(0% 0% 0% 0%)", duration: 0.9 * s, ease: "expo.inOut" },
-          short ? 0.5 : 1.0,
+          0.35 * s,
         )
-        .to(
-          name,
-          { autoAlpha: 1, scale: 1, duration: 0.7, ease: "back.out(2.2)" },
-          short ? 0.7 : 1.25,
-        )
-        .to(
-          navLinks,
-          { autoAlpha: 1, yPercent: 0, duration: 0.8, ease: "expo.out", stagger: 0.07 },
-          short ? 0.6 : 1.1,
-        )
-      return tl
+        .to(navLinks, { autoAlpha: 1, yPercent: 0, duration: 0.8, ease: "expo.out", stagger: 0.07 }, 0.45 * s)
+        .to(name, { autoAlpha: 1, scale: 1, duration: 0.7, ease: "back.out(2.2)" }, 0.7 * s)
     }
 
-    if (seen || deepLink) {
-      fontsReady.then(() => reveal(true))
+    if (!full) {
+      fontsReady.then(() => heroReveal(true).eventCallback("onComplete", finish))
       return
     }
 
-    // Phase A — loading
-    gsap.set(count, { visibility: "visible" })
-    gsap.fromTo(countOut, { yPercent: 110 }, { yPercent: 0, duration: 0.6, ease: "expo.out" })
-    gsap.to(panels, { scaleY: 0.955, duration: 0.9, ease: "expo.inOut", delay: 0.15 })
-    startFlicker()
+    /* ---- 1. Opening ---- */
+    gsap.set(frame, { opacity: 0 }) // the hero image waits for the handoff
+    gsap.set(introLetters, { y: 0, yPercent: 110 })
 
+    const spread = () => {
+      const vw = window.innerWidth
+      const vh = window.innerHeight
+      const width = Math.min(vw * (vw < 768 ? 0.42 : 0.3), 34 * 16)
+      return { width, height: Math.min(width * 0.66, vh * 0.42) }
+    }
+    gsap.set(media, { ...spread(), clipPath: "inset(50% 0% 50% 0%)" })
+
+    // Flick through the projects inside the image box
+    let flickIndex = 0
+    const showMedia = (i) =>
+      mediaImgs.forEach((img, j) => {
+        img.style.zIndex = j === i ? 1 : 0
+      })
+    showMedia(0)
+    const flick = gsap.to(
+      {},
+      {
+        duration: 0.12,
+        repeat: -1,
+        onRepeat: () => {
+          flickIndex = (flickIndex + 1) % mediaImgs.length
+          showMedia(flickIndex)
+        },
+      },
+    )
+
+    gsap
+      .timeline()
+      .to(introLetters, { yPercent: 0, duration: 1.2, ease: "expo.out", stagger: 0.035 }, 0.1)
+      .to(media, { clipPath: "inset(0% 0% 0% 0%)", duration: 1.1, ease: "expo.inOut" }, 0.25)
+      .fromTo(
+        countWrap.children,
+        { yPercent: 110 },
+        { yPercent: 0, duration: 0.6, ease: "expo.out", stagger: 0.05 },
+        0.3,
+      )
+
+    // Counter follows real loading: fonts + every image, capped
     const counter = { value: 0 }
     const render = () => {
       countOut.textContent = String(Math.round(counter.value)).padStart(3, "0")
     }
-    let counterTween = gsap.to(counter, {
-      value: 90,
-      duration: 1.4,
-      ease: "power2.out",
-      onUpdate: render,
-    })
+    let counterTween = gsap.to(counter, { value: 90, duration: 1.6, ease: "power2.out", onUpdate: render })
 
-    // Real loading signal: fonts + every hero image, capped so we never hang
     const loads = [
       fontsReady,
-      ...slides.map((img) =>
+      ...[...slides, ...mediaImgs].map((img) =>
         img.complete ? Promise.resolve() : img.decode().catch(() => {}),
       ),
     ]
@@ -744,20 +734,76 @@
       Promise.all(loads),
       new Promise((resolve) => setTimeout(resolve, 3500)),
     ])
-    const minimum = new Promise((resolve) => setTimeout(resolve, 1500))
+    const minimum = new Promise((resolve) => setTimeout(resolve, 1800))
 
     Promise.all([assets, minimum]).then(() => {
       counterTween.kill()
       counterTween = gsap.to(counter, {
         value: 100,
-        duration: 0.45,
+        duration: 0.4,
         ease: "power2.inOut",
         onUpdate: render,
-        onComplete: () => {
-          fitAll()
-          reveal(false)
-        },
+        onComplete: closeIn,
       })
     })
+
+    /* ---- 2. Close-in: image shrinks inline, words slide together ---- */
+    function closeIn() {
+      fitAll()
+      const fs = parseFloat(getComputedStyle(row).fontSize)
+      gsap
+        .timeline()
+        .to(countWrap.children, { yPercent: -110, duration: 0.5, ease: "power3.in", stagger: 0.04 }, 0)
+        .to(media, { width: fs * 1.2, height: fs * 0.72, duration: 1.2, ease: "expo.inOut" }, 0.1)
+        .call(
+          () => {
+            // Land on the first project in both the overlay and the hero
+            flick.kill()
+            showMedia(0)
+            index = 0
+            restack(0)
+            writeCopy(0)
+          },
+          null,
+          0.9,
+        )
+        .add(handoff, 1.65)
+    }
+
+    /* ---- 3. Handoff: image flies into the hero preview box ---- */
+    function handoff() {
+      const from = media.getBoundingClientRect()
+      const to = target.getBoundingClientRect()
+
+      // Hold the row's layout while the image leaves it
+      const spacer = document.createElement("div")
+      const ms = getComputedStyle(media)
+      spacer.style.cssText = `flex:none;width:${from.width}px;height:${from.height}px;margin:0 ${ms.marginRight} 0 ${ms.marginLeft}`
+      media.before(spacer)
+      overlay.appendChild(media)
+      gsap.set(media, {
+        position: "fixed",
+        left: from.left,
+        top: from.top,
+        width: from.width,
+        height: from.height,
+        margin: 0,
+        zIndex: 2,
+      })
+
+      gsap
+        .timeline({ onComplete: finish })
+        .to(introLetters, { yPercent: -110, duration: 0.7, ease: "expo.in", stagger: 0.025 }, 0)
+        .to(
+          media,
+          { left: to.left, top: to.top, width: to.width, height: to.height, duration: 1.25, ease: "expo.inOut" },
+          0.15,
+        )
+        .to(overlay, { backgroundColor: "rgba(255,255,255,0)", duration: 0.8, ease: "power2.inOut" }, 0.6)
+        .add(heroReveal(false), 0.65)
+        // Cross-fade to the real hero image once the box has landed
+        .set(frame, { opacity: 1 }, 1.35)
+        .to(media, { autoAlpha: 0, duration: 0.35, ease: "power1.out" }, 1.36)
+    }
   }
 })()

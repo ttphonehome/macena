@@ -287,78 +287,99 @@ button {
   overflow: hidden;
 }
 
-/* The small, pre-scroll image box. .hero__target is an invisible
-   measuring box; .hero__curtain sits exactly over it for the intro. */
-.hero__target,
-.hero__curtain {
+/* Invisible box that defines the small, pre-scroll image position */
+.hero__target {
   position: absolute;
   top: 40%;
   left: 50%;
   width: clamp(17.5rem, 23.55vw, 25.44rem);
   height: clamp(11.5rem, 15.45vw, 16.7rem);
   translate: -50% -50%;
+  visibility: hidden;
   pointer-events: none;
 }
 
-.hero__target {
-  visibility: hidden;
-}
+/* ---------- Landing intro overlay ---------- */
 
-/* ---------- Landing intro ---------- */
-
-.hero__curtain {
-  z-index: 3;
+.intro {
+  position: fixed;
+  z-index: 90;
+  inset: 0;
   display: none;
-}
-
-.js .hero__curtain {
-  display: block;
-}
-
-.hero__curtain-panel {
-  position: absolute;
-  left: -2px;
-  right: -2px;
-  height: calc(50% + 2px);
+  place-items: center;
+  overflow: hidden;
   background: var(--white);
-  transform: scaleY(0);
 }
 
-.hero__curtain-panel--top {
-  top: -2px;
-  transform-origin: 50% 0%;
+.is-loading .intro,
+.intro.is-active {
+  display: grid;
 }
 
-.hero__curtain-panel--bottom {
-  bottom: -2px;
-  transform-origin: 50% 100%;
+.is-repeat .intro {
+  display: none !important;
 }
 
-.is-loading .hero__curtain-panel {
-  transform: scaleY(1);
+.intro__row {
+  display: flex;
+  align-items: center;
+  font-size: clamp(2.4rem, 11vw, 13rem);
+  letter-spacing: -0.03em;
+  line-height: 0.8;
+  white-space: nowrap;
 }
 
-.hero__count {
+.intro__word {
+  display: inline-flex;
+  overflow: hidden;
+  padding-block: 0.06em 0.02em;
+}
+
+.intro__word > span {
+  display: inline-block;
+}
+
+/* Final inline size; JS starts it wide and closes it in */
+.intro__media {
+  position: relative;
+  flex: none;
+  width: 1.2em;
+  height: 0.72em;
+  margin-inline: 0.08em;
+  overflow: hidden;
+  background: var(--placeholder);
+}
+
+.intro__media img {
   position: absolute;
-  /* Just under the slit (panels scale to 0.955 → slit is ~4.5% tall) */
-  top: calc(52.25% + 0.6rem);
-  left: 0;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.intro__count {
+  position: absolute;
+  left: var(--pad);
+  bottom: max(var(--pad), env(safe-area-inset-bottom));
+  display: flex;
+  gap: 0.5em;
   overflow: hidden;
   font-size: var(--fs-small);
   font-weight: 600;
   letter-spacing: 0.02em;
   line-height: 1.1;
   font-variant-numeric: tabular-nums;
-  visibility: hidden;
 }
 
-.hero__count > span {
+.intro__count > span {
   display: inline-block;
 }
 
 /* Pre-intro states, so nothing flashes before GSAP takes over */
-.is-loading [data-letter] {
-  transform: translateY(110%) rotate(6deg);
+.is-loading [data-letter],
+.is-loading [data-intro-letter] {
+  transform: translateY(110%);
 }
 
 .is-loading .hero__intro .wordmark__name,
@@ -757,8 +778,7 @@ button {
   }
 
   /* Portrait preview: closer to the tall full-bleed frame, so less is cropped */
-  .hero__target,
-  .hero__curtain {
+  .hero__target {
     top: 42%;
     width: 62vw;
     height: min(78vw, 46svh);
