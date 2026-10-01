@@ -690,12 +690,9 @@ button {
   text-align: center;
 }
 
-/* Years are a mobile-only detail; on desktop the right column stays empty
-   so the studio name remains centred */
+/* Full black on desktop; softened to 40% on mobile (see mobile block) */
 .experience__years {
-  display: none;
   text-align: right;
-  opacity: 0.4;
 }
 
 @media (hover: hover) {
@@ -845,8 +842,8 @@ button {
   }
 
   .experience__years {
-    display: block;
     grid-area: years;
+    opacity: 0.4;
     font-size: 0.875rem;
   }
 

@@ -536,10 +536,21 @@
           { borderTopColor: "rgba(0,0,0,0)" },
           { borderTopColor: "rgba(0,0,0,1)", duration: 0.6, stagger: 0.08, ease: "none" },
         )
+        const cells = rows.flatMap((row) => [...row.children])
+        // Fade each cell to its CSS opacity (dates are 40% on mobile only),
+        // then hand opacity back to the stylesheet for breakpoint changes
+        const targets = cells.map((el) => parseFloat(getComputedStyle(el).opacity) || 1)
         gsap.fromTo(
-          rows.flatMap((row) => [...row.children]),
+          cells,
           { autoAlpha: 0, yPercent: 60 },
-          { autoAlpha: (i, el) => (el.classList.contains("experience__years") ? 0.4 : 1), yPercent: 0, duration: 0.9, ease: "expo.out", stagger: 0.025 },
+          {
+            autoAlpha: (i) => targets[i],
+            yPercent: 0,
+            duration: 0.9,
+            ease: "expo.out",
+            stagger: 0.025,
+            clearProps: "opacity,visibility,transform",
+          },
         )
       },
     })
