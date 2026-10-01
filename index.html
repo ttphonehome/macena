@@ -1,0 +1,264 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Jose Macena — Design Director</title>
+    <meta
+      name="description"
+      content="Jose Macena is a Design Director working across brand identity and digital design. Lisbon / London."
+    />
+    <meta name="theme-color" content="#ffffff" />
+    <meta property="og:title" content="Jose Macena — Design Director" />
+    <meta
+      property="og:description"
+      content="Brand identity and digital design. Lisbon / London."
+    />
+    <meta property="og:image" content="assets/img/macena-coast-1800.jpg" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@600;800&display=swap"
+    />
+    <link rel="preload" as="image" href="assets/img/macena-coast-900.jpg" />
+
+    <link rel="stylesheet" href="assets/vendor/lenis.css" />
+    <link rel="stylesheet" href="styles.css" />
+
+    <script>
+      document.documentElement.classList.add("js")
+    </script>
+  </head>
+  <body>
+    <a class="skip-link" href="#about">Skip to content</a>
+
+    <header class="site-header" data-header>
+      <nav class="site-header__nav" aria-label="Primary">
+        <a class="nav-link" href="#work" data-scroll-to="work">
+          <span class="nav-link__roll" aria-hidden="true"><span>WORK</span><span>WORK</span></span>
+          <span class="sr-only">Work</span>
+        </a>
+        <a class="nav-link" href="#about" data-scroll-to="about">
+          <span class="nav-link__roll" aria-hidden="true"><span>ABOUT</span><span>ABOUT</span></span>
+          <span class="sr-only">About</span>
+        </a>
+        <a class="nav-link" href="#experience" data-scroll-to="experience">
+          <span class="nav-link__roll" aria-hidden="true"
+            ><span>EXPERIENCE</span><span>EXPERIENCE</span></span
+          >
+          <span class="sr-only">Experience</span>
+        </a>
+      </nav>
+    </header>
+
+    <main>
+      <!-- HERO: small preview image expands to full-bleed project viewer on scroll -->
+      <section class="hero" id="work" aria-label="Selected work" data-hero>
+        <div class="hero__stage">
+          <div class="hero__target" aria-hidden="true" data-hero-target></div>
+
+          <div class="hero__frame" data-hero-frame>
+            <div class="hero__slides" data-hero-slides>
+              <img
+                class="hero__slide"
+                src="assets/img/macena-coast-900.jpg"
+                srcset="assets/img/macena-coast-900.jpg 900w, assets/img/macena-coast-1800.jpg 1800w"
+                sizes="100vw"
+                alt="Concrete architecture framing a calm blue ocean"
+                data-client="SALT HOUSE"
+                data-discipline="BRAND IDENTITY"
+                data-year="2026"
+                data-blurb="Hospitality identity shaped by concrete and horizon lines."
+                fetchpriority="high"
+              />
+              <img
+                class="hero__slide"
+                src="assets/img/work-02-900.jpg"
+                srcset="assets/img/work-02-900.jpg 900w, assets/img/work-02-1800.jpg 1800w"
+                sizes="100vw"
+                alt="Grey concrete building against a pale sky"
+                data-client="OBRA STUDIO"
+                data-discipline="DIGITAL DESIGN"
+                data-year="2025"
+                data-blurb="A slow, deliberate digital home for an architecture practice."
+              />
+              <img
+                class="hero__slide"
+                src="assets/img/work-03-900.jpg"
+                srcset="assets/img/work-03-900.jpg 900w, assets/img/work-03-1800.jpg 1800w"
+                sizes="100vw"
+                alt="Black and white photograph of stacked concrete blocks"
+                data-client="MONOLITH"
+                data-discipline="IDENTITY · PRINT"
+                data-year="2025"
+                data-blurb="Monochrome identity drawn from the weight of stacked blocks."
+              />
+              <img
+                class="hero__slide"
+                src="assets/img/work-04-900.jpg"
+                srcset="assets/img/work-04-900.jpg 900w, assets/img/work-04-1800.jpg 1800w"
+                sizes="100vw"
+                alt="Tall building rising into a blue sky"
+                data-client="ALTO"
+                data-discipline="BRAND · CAMPAIGN"
+                data-year="2024"
+                data-blurb="Launch campaign framing a tower as one upward gesture."
+              />
+            </div>
+
+            <div class="project-ui" data-project-ui>
+              <!-- Pointer devices: each half of the image is a hit zone with a following chevron cursor -->
+              <button type="button" class="project-ui__zone project-ui__zone--prev" data-prev>
+                <span class="sr-only">Previous project</span>
+              </button>
+              <button type="button" class="project-ui__zone project-ui__zone--next" data-next>
+                <span class="sr-only">Next project</span>
+              </button>
+              <div class="project-ui__cursor" aria-hidden="true" data-cursor>
+                <img src="assets/icons/chevron.svg" alt="" width="111" height="72" />
+              </div>
+
+              <div class="project-ui__copy" aria-live="polite" aria-atomic="true">
+                <p class="project-ui__client" data-client-out>SALT HOUSE</p>
+                <p class="project-ui__blurb" data-blurb-out>
+                  Hospitality identity shaped by concrete and horizon lines.
+                </p>
+              </div>
+
+              <!-- Touch devices: explicit controls (plus horizontal swipe) -->
+              <div class="project-ui__controls">
+                <button type="button" class="project-ui__btn project-ui__btn--prev" data-prev>
+                  <img src="assets/icons/chevron.svg" alt="" width="111" height="72" />
+                  <span class="sr-only">Previous project</span>
+                </button>
+                <p class="project-ui__count" data-count>1/4</p>
+                <button type="button" class="project-ui__btn project-ui__btn--next" data-next>
+                  <img src="assets/icons/chevron.svg" alt="" width="111" height="72" />
+                  <span class="sr-only">Next project</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="hero__intro" data-hero-intro>
+            <a class="availability" href="mailto:hello@macena.studio" data-intro-fade>
+              AVAILABLE FOR FREELANCE <span class="arrow-glyph" aria-hidden="true">&#x2197;&#xFE0E;</span>
+            </a>
+            <div class="wordmark-wrap">
+              <h1 class="wordmark" data-fit="MACENA" aria-label="Jose Macena">
+                <span class="wordmark__letter" aria-hidden="true"><span data-letter>M</span></span
+                ><span class="wordmark__letter" aria-hidden="true"><span data-letter>A</span></span
+                ><span class="wordmark__letter" aria-hidden="true"><span data-letter>C<span class="wordmark__probe"></span></span></span
+                ><span class="wordmark__letter" aria-hidden="true"><span data-letter>E</span></span
+                ><span class="wordmark__letter" aria-hidden="true"><span data-letter>N</span></span
+                ><span class="wordmark__letter" aria-hidden="true"><span data-letter>A</span></span
+                ><span class="wordmark__name" aria-hidden="true" data-intro-fade>JOSE</span>
+              </h1>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ABOUT -->
+      <section class="about" id="about" aria-labelledby="about-label" data-about>
+        <div class="about__portrait" aria-hidden="true" data-portrait>
+          <img src="assets/img/portrait-800.jpg" alt="" width="800" height="1000" loading="lazy" />
+        </div>
+        <h2 class="about__label" id="about-label">ABOUT</h2>
+        <p class="about__copy" data-split-lines>
+          I’m a Design Director working across brand identity and digital design. I help
+          businesses figure out who they are, build the visual system around it, and carry it
+          through every touchpoint.
+        </p>
+      </section>
+
+      <!-- EXPERIENCE -->
+      <section class="experience" id="experience" aria-labelledby="experience-label">
+        <h2 class="experience__label" id="experience-label">EXPERIENCE</h2>
+        <ul class="experience__list" data-experience>
+          <li class="experience__row">
+            <span class="experience__role">SENIOR DESIGNER</span>
+            <span class="experience__studio">KOTO</span>
+            <span class="experience__years">2024-26</span>
+          </li>
+          <li class="experience__row">
+            <span class="experience__role">SENIOR DESIGNER</span>
+            <span class="experience__studio">TWELFTHMAN</span>
+            <span class="experience__years">2024-26</span>
+          </li>
+          <li class="experience__row">
+            <span class="experience__role">SENIOR DESIGNER</span>
+            <span class="experience__studio">RAGGED EDGE</span>
+            <span class="experience__years">2024-26</span>
+          </li>
+          <li class="experience__row">
+            <span class="experience__role">SENIOR DESIGNER</span>
+            <span class="experience__studio">NB STUDIO</span>
+            <span class="experience__years">2024-26</span>
+          </li>
+          <li class="experience__row">
+            <span class="experience__role">SENIOR DESIGNER</span>
+            <span class="experience__studio">BENFICA</span>
+            <span class="experience__years">2024-26</span>
+          </li>
+          <li class="experience__row">
+            <span class="experience__role">SENIOR DESIGNER</span>
+            <span class="experience__studio">CHUTA CHUTA</span>
+            <span class="experience__years">2024-26</span>
+          </li>
+          <li class="experience__row">
+            <span class="experience__role">SENIOR DESIGNER</span>
+            <span class="experience__studio">ALLEZ</span>
+            <span class="experience__years">2024-26</span>
+          </li>
+        </ul>
+      </section>
+    </main>
+
+    <footer class="footer" data-footer>
+      <div class="footer__nav">
+        <p>LISBON</p>
+        <ul class="footer__social" aria-label="Social">
+          <li>
+            <a class="nav-link" href="#">
+              <span class="nav-link__roll" aria-hidden="true"><span>LINKEDIN</span><span>LINKEDIN</span></span>
+              <span class="sr-only">LinkedIn</span>
+            </a>
+          </li>
+          <li>
+            <a class="nav-link" href="#">
+              <span class="nav-link__roll" aria-hidden="true"><span>INSTAGRAM</span><span>INSTAGRAM</span></span>
+              <span class="sr-only">Instagram</span>
+            </a>
+          </li>
+          <li>
+            <a class="nav-link" href="#">
+              <span class="nav-link__roll" aria-hidden="true"><span>X</span><span>X</span></span>
+              <span class="sr-only">X</span>
+            </a>
+          </li>
+        </ul>
+        <p>LONDON</p>
+      </div>
+      <div class="wordmark-wrap footer__wordmark-wrap">
+        <p class="wordmark" data-fit="MACENA" aria-label="Jose Macena">
+          <span class="wordmark__letter" aria-hidden="true"><span data-footer-letter>M</span></span
+          ><span class="wordmark__letter" aria-hidden="true"><span data-footer-letter>A</span></span
+          ><span class="wordmark__letter" aria-hidden="true"><span data-footer-letter>C<span class="wordmark__probe"></span></span></span
+          ><span class="wordmark__letter" aria-hidden="true"><span data-footer-letter>E</span></span
+          ><span class="wordmark__letter" aria-hidden="true"><span data-footer-letter>N</span></span
+          ><span class="wordmark__letter" aria-hidden="true"><span data-footer-letter>A</span></span
+          ><span class="wordmark__name" aria-hidden="true" data-footer-name>JOSE</span>
+        </p>
+      </div>
+    </footer>
+
+    <script src="assets/vendor/gsap.min.js" defer></script>
+    <script src="assets/vendor/ScrollTrigger.min.js" defer></script>
+    <script src="assets/vendor/SplitText.min.js" defer></script>
+    <script src="assets/vendor/lenis.min.js" defer></script>
+    <script src="main.js" defer></script>
+  </body>
+</html>

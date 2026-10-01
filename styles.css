@@ -1,0 +1,827 @@
+/* ==========================================================================
+   Jose Macena — portfolio
+   Static rebuild of the Figma Make prototype. GSAP + ScrollTrigger + Lenis.
+   ========================================================================== */
+
+:root {
+  --black: #000;
+  --white: #fff;
+  --placeholder: #d9d9d9;
+
+  --pad: clamp(1rem, 2.2vw, 2.4rem);
+  --frame-inset: max(1rem, 2.2vw);
+
+  --fs-nav: clamp(0.95rem, 2.32vw, 2.5rem);
+  --fs-display: clamp(1.6rem, 3.7vw, 4rem);
+  --fs-small: clamp(0.7rem, 1.16vw, 1.25rem);
+
+  --ease-in-out: cubic-bezier(0.7, 0, 0.2, 1);
+  --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
+
+  --tap: 44px;
+
+  font-family: "Inter Tight", "Helvetica Neue", Arial, sans-serif;
+  font-weight: 800;
+  font-synthesis: none;
+  color: var(--black);
+  background: var(--white);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* ---------- Reset ---------- */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scrollbar-width: thin;
+  -webkit-text-size-adjust: 100%;
+}
+
+/* Native smooth anchor scroll only when Lenis isn't running */
+html:not(.lenis) {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  overflow-x: clip;
+  background: var(--white);
+}
+
+h1,
+h2,
+p,
+ul {
+  margin: 0;
+  padding: 0;
+  font: inherit;
+}
+
+ul {
+  list-style: none;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 4px;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+.skip-link {
+  position: fixed;
+  z-index: 100;
+  top: 0.5rem;
+  left: 0.5rem;
+  padding: 0.6rem 0.9rem;
+  color: var(--white);
+  background: var(--black);
+  font-size: 0.875rem;
+  transform: translateY(-200%);
+}
+
+.skip-link:focus {
+  transform: none;
+}
+
+/* ---------- Nav link (roll + underline) ---------- */
+
+.nav-link {
+  position: relative;
+  display: inline-block;
+}
+
+/* Expand the tap target without changing layout */
+.nav-link::before {
+  content: "";
+  position: absolute;
+  inset: -0.75rem -0.5rem;
+}
+
+.nav-link__roll {
+  position: relative;
+  display: inline-grid;
+  overflow: hidden;
+  padding-bottom: 0.08em;
+}
+
+.nav-link__roll > span {
+  grid-area: 1 / 1;
+  transition: transform 0.5s var(--ease-in-out);
+}
+
+.nav-link__roll > span:last-child {
+  transform: translateY(110%);
+  font-style: italic;
+}
+
+.nav-link__roll::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 0;
+  height: 0.08em;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform 0.5s var(--ease-in-out);
+}
+
+@media (hover: hover) {
+  .nav-link:hover .nav-link__roll > span:first-child {
+    transform: translateY(-110%);
+  }
+
+  .nav-link:hover .nav-link__roll > span:last-child {
+    transform: translateY(0);
+  }
+
+  .nav-link:hover .nav-link__roll::after {
+    transform: scaleX(1);
+    transform-origin: left;
+  }
+}
+
+.nav-link:focus-visible .nav-link__roll::after {
+  transform: scaleX(1);
+}
+
+/* ---------- Header ---------- */
+
+.site-header {
+  position: fixed;
+  z-index: 50;
+  inset: 0 0 auto;
+  padding: clamp(1rem, 1.6vw, 1.75rem) var(--pad) 0;
+  padding-top: max(clamp(1rem, 1.6vw, 1.75rem), env(safe-area-inset-top));
+  color: var(--white);
+  mix-blend-mode: difference;
+  pointer-events: none;
+  transition: transform 0.55s var(--ease-out);
+}
+
+.site-header.is-hidden {
+  transform: translateY(-100%);
+}
+
+.site-header__nav {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 1rem;
+  align-items: start;
+  font-size: var(--fs-nav);
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
+
+.site-header__nav > * {
+  pointer-events: auto;
+}
+
+.site-header__nav > :nth-child(2) {
+  justify-self: center;
+}
+
+.site-header__nav > :last-child {
+  justify-self: end;
+}
+
+/* ---------- Wordmark ---------- */
+
+.wordmark-wrap {
+  position: relative;
+  width: 100%;
+  line-height: 0;
+}
+
+.wordmark {
+  position: relative;
+  display: inline-block;
+  font-size: 23vw; /* replaced by JS fit-to-width */
+  letter-spacing: -0.03em;
+  line-height: 0.74;
+  white-space: nowrap;
+}
+
+.wordmark__letter {
+  display: inline-block;
+  overflow: hidden;
+  padding-top: 0.04em;
+  vertical-align: top;
+}
+
+.wordmark__letter > span {
+  display: inline-block;
+  transform-origin: left bottom;
+}
+
+/* JOSE sits inside the C counter, sized relative to the wordmark.
+   JS (placeName) centres it on the C's measured glyph ink; these
+   values are only the pre-JS fallback. */
+.wordmark__name {
+  position: absolute;
+  top: 38%;
+  left: 39.5%;
+  /* Pure ratio of the wordmark so it always fits the C's counter */
+  font-size: 0.1em;
+  letter-spacing: -0.02em;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+/* Zero-size marker whose offsetTop is the C's baseline */
+.wordmark__probe {
+  display: inline-block;
+  width: 0;
+  height: 0;
+  vertical-align: baseline;
+}
+
+/* ---------- Hero ---------- */
+
+.hero {
+  position: relative;
+  /* 75% of the travel expands the image, the rest holds it full-bleed */
+  height: 260svh;
+}
+
+.hero__stage {
+  position: sticky;
+  top: 0;
+  height: 100svh;
+  overflow: hidden;
+}
+
+/* Invisible box that defines the small, pre-scroll image position */
+.hero__target {
+  position: absolute;
+  top: 40%;
+  left: 50%;
+  width: clamp(17.5rem, 23.55vw, 25.44rem);
+  height: clamp(11.5rem, 15.45vw, 16.7rem);
+  translate: -50% -50%;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+/* The frame is always full size; JS clips it down to the target box */
+.hero__frame {
+  position: absolute;
+  z-index: 2;
+  inset: var(--frame-inset);
+  overflow: hidden;
+  background: var(--placeholder);
+}
+
+.js .hero__frame {
+  visibility: hidden;
+}
+
+.hero__slides {
+  position: absolute;
+  inset: 0;
+  transform-origin: 50% 50%;
+  will-change: transform;
+}
+
+.hero__slide {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.hero__slide:first-child {
+  z-index: 1;
+}
+
+.hero__intro {
+  position: absolute;
+  z-index: 4;
+  inset: auto 0 0;
+  padding: 0 var(--pad) max(var(--pad), env(safe-area-inset-bottom));
+}
+
+.availability {
+  display: inline-block;
+  margin-bottom: max(0.4vw, 0.4rem);
+  font-size: var(--fs-small);
+  letter-spacing: 0.01em;
+  background: linear-gradient(currentColor, currentColor) left bottom / 0 2px no-repeat;
+  transition: background-size 0.4s var(--ease-in-out);
+}
+
+.availability:hover,
+.availability:focus-visible {
+  background-size: 100% 2px;
+}
+
+/* Force Inter Tight's own arrow (text presentation, never the emoji) */
+.arrow-glyph {
+  font-variant-emoji: text;
+}
+
+/* ---------- Project viewer ---------- */
+
+.project-ui {
+  position: absolute;
+  z-index: 5;
+  inset: 0;
+  color: var(--white);
+  background: linear-gradient(0deg, rgb(0 0 0 / 0.5), transparent 45%);
+  touch-action: pan-y; /* vertical scroll stays native; horizontal = swipe */
+}
+
+.js .project-ui {
+  visibility: hidden;
+  opacity: 0;
+}
+
+.project-ui__copy {
+  position: absolute;
+  z-index: 1;
+  left: clamp(1.25rem, 2.85vw, 2.95rem);
+  bottom: clamp(1.25rem, 3vw, 3.125rem);
+  display: flex;
+  width: min(56.5%, 58rem);
+  flex-direction: column;
+  gap: clamp(0.75rem, 2vw, 2.125rem);
+  line-height: 1;
+  pointer-events: none;
+}
+
+.project-ui__client {
+  font-size: var(--fs-nav);
+  letter-spacing: -0.02em;
+}
+
+.project-ui__blurb {
+  font-size: var(--fs-display);
+  letter-spacing: -0.01em;
+  line-height: 1;
+  text-wrap: balance;
+}
+
+/* SplitText line masks: room for descenders */
+.line-mask {
+  padding-bottom: 0.1em;
+  margin-bottom: -0.1em;
+}
+
+.project-ui__controls {
+  position: absolute;
+  z-index: 2;
+  right: clamp(1.25rem, 2.85vw, 2.95rem);
+  bottom: clamp(1.25rem, 3vw, 3.125rem);
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.project-ui__count {
+  min-width: 2.6em;
+  font-size: var(--fs-small);
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.project-ui__btn {
+  display: grid;
+  place-items: center;
+  width: var(--tap);
+  height: var(--tap);
+  border-radius: 50%;
+}
+
+.project-ui__btn img {
+  width: 1.1rem;
+  height: auto;
+  filter: invert(1);
+}
+
+.project-ui__btn--prev img {
+  transform: rotate(-90deg);
+}
+
+.project-ui__btn--next img {
+  transform: rotate(90deg);
+}
+
+.project-ui__btn:active {
+  background: rgb(255 255 255 / 0.15);
+}
+
+/* Each half of the image is a hit zone on pointer devices */
+.project-ui__zone {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 50%;
+  cursor: none;
+}
+
+.project-ui__zone--prev {
+  left: 0;
+}
+
+.project-ui__zone--next {
+  right: 0;
+}
+
+.project-ui__zone:focus-visible {
+  outline-offset: -8px;
+}
+
+.project-ui__cursor {
+  position: absolute;
+  z-index: 3;
+  top: 0;
+  left: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.project-ui__cursor img {
+  width: clamp(2.5rem, 4.17vw, 4.5rem);
+  height: auto;
+  filter: invert(1) drop-shadow(0 2px 10px rgb(0 0 0 / 0.25));
+}
+
+/* Pointer devices: cursor + zones; hide the touch buttons */
+@media (hover: hover) and (pointer: fine) {
+  .project-ui__btn {
+    display: none;
+  }
+}
+
+/* Touch devices: buttons + swipe; no zones or custom cursor */
+@media not ((hover: hover) and (pointer: fine)) {
+  .project-ui__zone,
+  .project-ui__cursor {
+    display: none;
+  }
+}
+
+/* ---------- About ---------- */
+
+.about {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(1.5rem, 2.5vw, 2.75rem);
+  padding: clamp(13rem, 21vw, 25rem) clamp(1.25rem, 6.9vw, 8.25rem) clamp(14rem, 23vw, 28rem);
+  text-align: center;
+}
+
+.about__portrait {
+  position: absolute;
+  z-index: 2;
+  top: 0;
+  left: 0;
+  width: clamp(8rem, 13vw, 14rem);
+  aspect-ratio: 339 / 369;
+  overflow: hidden;
+  pointer-events: none;
+  background: var(--placeholder);
+  visibility: hidden;
+}
+
+.about__portrait img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: grayscale(1) contrast(1.05);
+}
+
+.about__label,
+.about__copy {
+  position: relative;
+  z-index: 3;
+}
+
+.about__label {
+  font-size: var(--fs-nav);
+  letter-spacing: -0.02em;
+}
+
+.about__copy {
+  max-width: 78.5rem;
+  font-size: clamp(1.6rem, 3.7vw, 4rem);
+  letter-spacing: -0.01em;
+  line-height: 1.03;
+  text-wrap: balance;
+}
+
+/* Desktop: portrait follows the cursor, text inverts over it */
+@media (hover: hover) and (pointer: fine) and (min-width: 768px) {
+  .about {
+    cursor: crosshair;
+  }
+
+  .about__label,
+  .about__copy {
+    color: var(--white);
+    mix-blend-mode: difference;
+  }
+}
+
+/* Touch / small screens: portrait sits statically above the copy */
+@media not ((hover: hover) and (pointer: fine) and (min-width: 768px)) {
+  .about {
+    padding-block: 9rem 10rem;
+  }
+
+  .about__portrait {
+    position: relative;
+    order: -1;
+    width: min(56vw, 15rem);
+    margin-bottom: 0.5rem;
+    visibility: visible;
+  }
+
+  .about__copy {
+    line-height: 1.05;
+  }
+}
+
+/* ---------- Experience ---------- */
+
+.experience {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(2rem, 3.6vw, 3.875rem);
+  padding: 0 clamp(1rem, 1.4vw, 1.5rem) clamp(5rem, 7.75vw, 8.375rem);
+  font-size: var(--fs-nav);
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
+
+.experience__list {
+  width: 100%;
+}
+
+.experience__row {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 1rem;
+  min-height: clamp(4rem, 6.4vw, 6.875rem);
+  border-top: 6px solid var(--black);
+  white-space: nowrap;
+  transition:
+    background-color 0.3s,
+    color 0.3s,
+    padding 0.4s var(--ease-in-out);
+}
+
+.experience__studio {
+  text-align: center;
+}
+
+/* Years are a mobile-only detail; on desktop the right column stays empty
+   so the studio name remains centred */
+.experience__years {
+  display: none;
+  text-align: right;
+  opacity: 0.4;
+}
+
+@media (hover: hover) {
+  .experience__row:hover {
+    padding-inline: clamp(0.5rem, 1vw, 1rem);
+    color: var(--white);
+    background: var(--black);
+  }
+}
+
+/* ---------- Footer ---------- */
+
+.footer {
+  position: relative;
+  display: flex;
+  min-height: 85svh;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 0 var(--pad) max(var(--pad), env(safe-area-inset-bottom));
+  overflow: hidden;
+  color: var(--white);
+  background: var(--black);
+}
+
+.footer__nav {
+  position: absolute;
+  top: var(--pad);
+  left: var(--pad);
+  right: var(--pad);
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 1rem;
+  align-items: start;
+  font-size: var(--fs-nav);
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
+
+.footer__nav > :last-child {
+  text-align: right;
+}
+
+.footer__social {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.15em;
+}
+
+/* ==========================================================================
+   Mobile
+   ========================================================================== */
+
+@media (max-width: 767px) {
+  :root {
+    --pad: 1rem;
+  }
+
+  /* Hero: shorter travel, larger preview so the first screen isn't empty */
+  .hero {
+    height: 230svh;
+  }
+
+  /* Portrait preview: closer to the tall full-bleed frame, so less is cropped */
+  .hero__target {
+    top: 42%;
+    width: 62vw;
+    height: min(78vw, 46svh);
+  }
+
+  .availability {
+    margin-bottom: 0.5rem;
+    font-size: 0.75rem;
+  }
+
+  .project-ui {
+    background: linear-gradient(0deg, rgb(0 0 0 / 0.6), transparent 55%);
+  }
+
+  .project-ui__copy {
+    left: 1rem;
+    right: 1rem;
+    bottom: calc(1rem + var(--tap) + 0.5rem);
+    width: auto;
+    gap: 0.6rem;
+  }
+
+  .project-ui__client {
+    font-size: 0.875rem;
+  }
+
+  .project-ui__blurb {
+    font-size: clamp(1.5rem, 7.2vw, 2.1rem);
+    line-height: 1.02;
+  }
+
+  /* Controls become a full-width bar: count left, arrows right */
+  .project-ui__controls {
+    left: 0.25rem;
+    right: 0.25rem;
+    bottom: 0.5rem;
+    justify-content: space-between;
+  }
+
+  .project-ui__count {
+    order: -1;
+    padding-left: 0.75rem;
+    text-align: left;
+    font-size: 0.8rem;
+  }
+
+  .project-ui__btn--prev {
+    margin-left: auto;
+  }
+
+  .about__copy {
+    font-size: clamp(1.5rem, 7.4vw, 2.2rem);
+  }
+
+  /* Experience: studio leads, years right, role as a quiet second line */
+  .experience {
+    padding-bottom: 5rem;
+    font-size: 1.15rem;
+  }
+
+  .experience__label {
+    font-size: 0.95rem;
+  }
+
+  .experience__row {
+    grid-template-columns: 1fr auto;
+    grid-template-areas:
+      "studio years"
+      "role   role";
+    align-items: baseline;
+    row-gap: 0.35rem;
+    column-gap: 0.75rem;
+    min-height: 0;
+    padding-block: 0.85rem 0.95rem;
+    border-top-width: 4px;
+  }
+
+  .experience__studio {
+    grid-area: studio;
+    text-align: left;
+  }
+
+  .experience__years {
+    display: block;
+    grid-area: years;
+    font-size: 0.875rem;
+  }
+
+  .experience__role {
+    grid-area: role;
+    font-size: 0.7rem;
+    letter-spacing: 0.02em;
+    opacity: 0.55;
+  }
+
+  /* Footer: nav flows above the wordmark */
+  .footer {
+    min-height: 60svh;
+    justify-content: space-between;
+    gap: 3rem;
+    padding-top: 1.25rem;
+  }
+
+  .footer__nav {
+    position: static;
+    font-size: 0.95rem;
+  }
+
+  .footer__nav > p {
+    font-size: 0.8rem;
+  }
+
+  .footer__social {
+    gap: 0.75rem;
+  }
+}
+
+/* ==========================================================================
+   Reduced motion
+   ========================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+  }
+
+  html:not(.lenis) {
+    scroll-behavior: auto;
+  }
+}
