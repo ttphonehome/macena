@@ -287,16 +287,84 @@ button {
   overflow: hidden;
 }
 
-/* Invisible box that defines the small, pre-scroll image position */
-.hero__target {
+/* The small, pre-scroll image box. .hero__target is an invisible
+   measuring box; .hero__curtain sits exactly over it for the intro. */
+.hero__target,
+.hero__curtain {
   position: absolute;
   top: 40%;
   left: 50%;
   width: clamp(17.5rem, 23.55vw, 25.44rem);
   height: clamp(11.5rem, 15.45vw, 16.7rem);
   translate: -50% -50%;
-  visibility: hidden;
   pointer-events: none;
+}
+
+.hero__target {
+  visibility: hidden;
+}
+
+/* ---------- Landing intro ---------- */
+
+.hero__curtain {
+  z-index: 3;
+  display: none;
+}
+
+.js .hero__curtain {
+  display: block;
+}
+
+.hero__curtain-panel {
+  position: absolute;
+  left: -2px;
+  right: -2px;
+  height: calc(50% + 2px);
+  background: var(--white);
+  transform: scaleY(0);
+}
+
+.hero__curtain-panel--top {
+  top: -2px;
+  transform-origin: 50% 0%;
+}
+
+.hero__curtain-panel--bottom {
+  bottom: -2px;
+  transform-origin: 50% 100%;
+}
+
+.is-loading .hero__curtain-panel {
+  transform: scaleY(1);
+}
+
+.hero__count {
+  position: absolute;
+  /* Just under the slit (panels scale to 0.955 → slit is ~4.5% tall) */
+  top: calc(52.25% + 0.6rem);
+  left: 0;
+  overflow: hidden;
+  font-size: var(--fs-small);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+  visibility: hidden;
+}
+
+.hero__count > span {
+  display: inline-block;
+}
+
+/* Pre-intro states, so nothing flashes before GSAP takes over */
+.is-loading [data-letter] {
+  transform: translateY(110%) rotate(6deg);
+}
+
+.is-loading .hero__intro .wordmark__name,
+.is-loading .availability,
+.is-loading .site-header__nav > a {
+  opacity: 0;
 }
 
 /* The frame is always full size; JS clips it down to the target box */
@@ -692,7 +760,8 @@ button {
   }
 
   /* Portrait preview: closer to the tall full-bleed frame, so less is cropped */
-  .hero__target {
+  .hero__target,
+  .hero__curtain {
     top: 42%;
     width: 62vw;
     height: min(78vw, 46svh);

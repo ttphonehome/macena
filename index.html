@@ -28,7 +28,18 @@
     <link rel="stylesheet" href="styles.css" />
 
     <script>
-      document.documentElement.classList.add("js")
+      ;(function () {
+        var root = document.documentElement
+        root.classList.add("js")
+        // Hold the landing state until main.js plays the intro.
+        // Never leave the page hidden if a script fails to load.
+        if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+          root.classList.add("is-loading")
+          setTimeout(function () {
+            root.classList.remove("is-loading")
+          }, 6000)
+        }
+      })()
     </script>
   </head>
   <body>
@@ -58,6 +69,13 @@
       <section class="hero" id="work" aria-label="Selected work" data-hero>
         <div class="hero__stage">
           <div class="hero__target" aria-hidden="true" data-hero-target></div>
+
+          <!-- Landing intro: two panels close over the preview box, then part -->
+          <div class="hero__curtain" aria-hidden="true" data-curtain>
+            <span class="hero__curtain-panel hero__curtain-panel--top"></span>
+            <span class="hero__curtain-panel hero__curtain-panel--bottom"></span>
+            <p class="hero__count"><span data-count-out>000</span></p>
+          </div>
 
           <div class="hero__frame" data-hero-frame>
             <div class="hero__slides" data-hero-slides>

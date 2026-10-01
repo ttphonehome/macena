@@ -344,9 +344,10 @@
   })
 
   // While the preview is still small, flick through projects
+  let introDone = reduceMotion
   if (!reduceMotion) {
     setInterval(() => {
-      if (document.hidden || heroTl.scrollTrigger.progress > 0.01) return
+      if (!introDone || document.hidden || heroTl.scrollTrigger.progress > 0.01) return
       index = (index + 1) % total
       restack(index)
       writeCopy(index)
@@ -564,35 +565,182 @@
   /* ------------------------------------------------------------------------
      Intro: wordmark letters rise once fonts are ready
      ------------------------------------------------------------------------ */
-  const ready = document.fonts ? document.fonts.ready : Promise.resolve()
-  ready.then(() => {
+  const root = document.documentElement
+  const fontsReady = document.fonts ? document.fonts.ready : Promise.resolve()
+
+  // Settle the wordmark once the real font is in, whatever happens next
+  fontsReady.then(() => {
     fitAll()
     ScrollTrigger.refresh()
-
-    if (reduceMotion) return
-    gsap
-      .timeline({ delay: 0.1 })
-      .from("[data-letter]", {
-        yPercent: 110,
-        rotate: 6,
-        duration: 1.3,
-        ease: "expo.out",
-        stagger: 0.06,
-      })
-      .from(
-        frame,
-        { autoAlpha: 0, duration: 0.9, ease: "power2.out" },
-        0.2,
-      )
-      .from(
-        "[data-intro-fade]",
-        { autoAlpha: 0, y: 12, duration: 0.8, ease: "power3.out", stagger: 0.1 },
-        0.6,
-      )
-      .from(
-        header,
-        { autoAlpha: 0, y: -12, duration: 0.8, ease: "power3.out", clearProps: "transform" },
-        0.6,
-      )
   })
+
+  if (reduceMotion || !root.classList.contains("is-loading")) {
+    root.classList.remove("is-loading")
+  } else {
+    playIntro()
+  }
+
+  /**
+   * Landing intro
+   *  A. Loading: the preview box is closed to a thin slit by two white
+   *     panels; the projects flick behind it while a counter tracks
+   *     real font + image loading (with a minimum duration).
+   *  B. Reveal: counter exits, the slit opens to the full preview,
+   *     MACENA rises letter by letter, JOSE pops into the C, the
+   *     availability line wipes in and the nav drops down.
+   *  Repeat visits in the same session skip A and play a shorter B.
+   */
+  function playIntro() {
+    const curtain = $("[data-curtain]")
+    const panels = $$(".hero__curtain-panel", curtain)
+    const count = $(".hero__count", curtain)
+    const countOut = $("[data-count-out]", curtain)
+    const letters = $$("[data-letter]", hero)
+    const name = $(".wordmark__name", hero)
+    const availability = $(".availability", hero)
+    const navLinks = $$(".site-header__nav > a", header)
+
+    let seen = false
+    try {
+      seen = sessionStorage.getItem("mc-intro") === "1"
+    } catch (_) {}
+
+    // Start at the top with scrolling locked (unless arriving on a #section)
+    const deepLink = Boolean(location.hash)
+    if (!deepLink) {
+      if ("scrollRestoration" in history) history.scrollRestoration = "manual"
+      window.scrollTo(0, 0)
+      lenis?.scrollTo(0, { immediate: true })
+      lenis?.stop()
+      root.style.overflow = "hidden"
+    }
+
+    // Take over the CSS pre-states with inline GSAP state
+    gsap.set(panels, { scaleY: 1 })
+    // y: 0 discards the px offset GSAP parses from the CSS pre-state
+    gsap.set(letters, { y: 0, yPercent: 110, rotate: 6 })
+    gsap.set(name, { autoAlpha: 0, scale: 0.4 })
+    gsap.set(availability, { autoAlpha: 1, clipPath: "inset(0% 100% 0% 0%)" })
+    gsap.set(navLinks, { autoAlpha: 0, yPercent: -120 })
+    root.classList.remove("is-loading")
+
+    // Fast flicker through the projects behind the slit
+    let flick = null
+    const startFlicker = () => {
+      const step = () => {
+        index = (index + 1) % total
+        restack(index)
+        flick = gsap.delayedCall(0.11, step)
+      }
+      flick = gsap.delayedCall(0.11, step)
+    }
+    const stopFlicker = () => {
+      flick?.kill()
+      index = 0
+      restack(0)
+      writeCopy(0)
+    }
+
+    const finish = () => {
+      introDone = true
+      root.style.overflow = ""
+      lenis?.start()
+      gsap.set(curtain, { display: "none" })
+      try {
+        sessionStorage.setItem("mc-intro", "1")
+      } catch (_) {}
+    }
+
+    const reveal = (short) => {
+      const tl = gsap.timeline({ onComplete: finish })
+      const s = short ? 0.75 : 1 // compress timings on repeat visits
+
+      if (!short) {
+        tl.to(countOut, { yPercent: -110, duration: 0.5, ease: "power3.in" }, 0)
+        tl.call(stopFlicker, null, 0.25)
+      }
+
+      tl.to(
+        panels,
+        { scaleY: 0, duration: 1.2 * s, ease: "expo.inOut" },
+        short ? 0 : 0.2,
+      )
+        .to(
+          letters,
+          {
+            yPercent: 0,
+            rotate: 0,
+            duration: 1.4 * s,
+            ease: "expo.out",
+            stagger: 0.06 * s,
+          },
+          short ? 0.15 : 0.55,
+        )
+        .to(
+          availability,
+          { clipPath: "inset(0% 0% 0% 0%)", duration: 0.9 * s, ease: "expo.inOut" },
+          short ? 0.5 : 1.0,
+        )
+        .to(
+          name,
+          { autoAlpha: 1, scale: 1, duration: 0.7, ease: "back.out(2.2)" },
+          short ? 0.7 : 1.25,
+        )
+        .to(
+          navLinks,
+          { autoAlpha: 1, yPercent: 0, duration: 0.8, ease: "expo.out", stagger: 0.07 },
+          short ? 0.6 : 1.1,
+        )
+      return tl
+    }
+
+    if (seen || deepLink) {
+      fontsReady.then(() => reveal(true))
+      return
+    }
+
+    // Phase A — loading
+    gsap.set(count, { visibility: "visible" })
+    gsap.fromTo(countOut, { yPercent: 110 }, { yPercent: 0, duration: 0.6, ease: "expo.out" })
+    gsap.to(panels, { scaleY: 0.955, duration: 0.9, ease: "expo.inOut", delay: 0.15 })
+    startFlicker()
+
+    const counter = { value: 0 }
+    const render = () => {
+      countOut.textContent = String(Math.round(counter.value)).padStart(3, "0")
+    }
+    let counterTween = gsap.to(counter, {
+      value: 90,
+      duration: 1.4,
+      ease: "power2.out",
+      onUpdate: render,
+    })
+
+    // Real loading signal: fonts + every hero image, capped so we never hang
+    const loads = [
+      fontsReady,
+      ...slides.map((img) =>
+        img.complete ? Promise.resolve() : img.decode().catch(() => {}),
+      ),
+    ]
+    const assets = Promise.race([
+      Promise.all(loads),
+      new Promise((resolve) => setTimeout(resolve, 3500)),
+    ])
+    const minimum = new Promise((resolve) => setTimeout(resolve, 1500))
+
+    Promise.all([assets, minimum]).then(() => {
+      counterTween.kill()
+      counterTween = gsap.to(counter, {
+        value: 100,
+        duration: 0.45,
+        ease: "power2.inOut",
+        onUpdate: render,
+        onComplete: () => {
+          fitAll()
+          reveal(false)
+        },
+      })
+    })
+  }
 })()
