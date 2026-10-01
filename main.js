@@ -88,13 +88,17 @@
     // Glyph origin and baseline inside the wordmark (offsetParent)
     const originX = offsetWithin(glyph, el).left
     const baseline = offsetWithin(probe, el).top
-    const centerX = originX + (cLeft + cRight) / 2
+    const rightX = originX + cRight // where the C's terminals end
     const centerY = baseline + (cTop + cBottom) / 2
 
-    // Where JOSE's own cap ink centre sits inside its line box
+    // JOSE's own ink box (with its letter-spacing) inside its line box
     const nameStyle = getComputedStyle(name)
     const n = parseFloat(nameStyle.fontSize)
     measureCtx.font = `${nameStyle.fontWeight} 100px ${nameStyle.fontFamily}`
+    if ("letterSpacing" in measureCtx) {
+      const ls = (parseFloat(nameStyle.letterSpacing) / n) * 100 || 0
+      measureCtx.letterSpacing = `${ls}px`
+    }
     const j = measureCtx.measureText(name.textContent.trim())
     const kn = n / 100
     const ascent = (j.fontBoundingBoxAscent ?? j.actualBoundingBoxAscent) * kn
@@ -104,10 +108,12 @@
     const nameInkMid =
       nameBaseline - ((j.actualBoundingBoxAscent - j.actualBoundingBoxDescent) * kn) / 2
 
-    name.style.left = `${centerX}px`
+    // Right-align JOSE's inked E to the C's right edge (ignore side bearing)
+    const nameInkRight = j.actualBoundingBoxRight * kn
+    name.style.left = `${rightX - nameInkRight}px`
     name.style.top = `${centerY - nameInkMid}px`
     name.style.right = "auto"
-    gsap.set(name, { xPercent: -50 })
+    gsap.set(name, { xPercent: 0, transformOrigin: "100% 50%" })
   }
 
   // Offset of `node` relative to `ancestor`, ignoring CSS transforms
