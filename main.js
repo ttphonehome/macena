@@ -834,17 +834,24 @@
       grid.fill(0)
     }
 
-    wrap.addEventListener("pointerenter", (event) => {
-      if (!introDone || event.pointerType !== "mouse") return
+    // Wake on any mouse movement over the wordmark (not just on enter), so it
+    // also works when the pointer was already resting there as the intro ended
+    const engage = (event) => {
+      if (!introDone || event.pointerType !== "mouse") return false
       // Only while the wordmark is actually on screen at the top
-      if (heroTl.scrollTrigger.progress > 0.2) return
-      hovering = true
-      mouse.px = mouse.py = null
-      start()
-      onMove(event)
+      if (heroTl.scrollTrigger.progress > 0.2) return false
+      if (!hovering) {
+        hovering = true
+        mouse.px = mouse.py = null
+        start()
+      }
+      return true
+    }
+    wrap.addEventListener("pointerenter", (event) => {
+      if (engage(event)) onMove(event)
     })
     wrap.addEventListener("pointermove", (event) => {
-      if (hovering) onMove(event)
+      if (engage(event)) onMove(event)
     })
     wrap.addEventListener("pointerleave", () => {
       hovering = false
