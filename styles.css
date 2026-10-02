@@ -259,9 +259,25 @@ button {
   left: 39.5%;
   /* Pure ratio of the wordmark so it always fits the C's counter */
   font-size: 0.1em;
-  letter-spacing: -0.02em;
+  letter-spacing: 0;
   line-height: 1;
   white-space: nowrap;
+}
+
+/* Hero hover effect: the WebGL canvas stands in for the text while active */
+.wordmark-fx {
+  position: absolute;
+  z-index: 1;
+  display: none;
+  pointer-events: none;
+}
+
+.wordmark-wrap.is-fx .wordmark-fx {
+  display: block;
+}
+
+.wordmark-wrap.is-fx .wordmark {
+  color: transparent;
 }
 
 /* Zero-size marker whose offsetTop is the C's baseline */
@@ -367,7 +383,7 @@ button {
   overflow: hidden;
   font-size: var(--fs-small);
   font-weight: 600;
-  letter-spacing: 0.02em;
+  letter-spacing: 0;
   line-height: 1.1;
   font-variant-numeric: tabular-nums;
 }
@@ -433,7 +449,7 @@ button {
   display: inline-block;
   margin-bottom: max(0.4vw, 0.4rem);
   font-size: var(--fs-small);
-  letter-spacing: 0.01em;
+  letter-spacing: 0;
   background: linear-gradient(currentColor, currentColor) left bottom / 0 2px no-repeat;
   transition: background-size 0.4s var(--ease-in-out);
 }
@@ -509,7 +525,7 @@ button {
   min-width: 2.6em;
   font-size: var(--fs-small);
   font-weight: 600;
-  letter-spacing: 0.01em;
+  letter-spacing: 0;
   text-align: center;
   font-variant-numeric: tabular-nums;
 }
@@ -868,7 +884,7 @@ button {
   .experience__role {
     grid-area: role;
     font-size: 0.7rem;
-    letter-spacing: 0.02em;
+    letter-spacing: 0;
   }
 
   /* Footer: nav flows above the wordmark; 20% shorter than before (60svh) */
@@ -884,9 +900,23 @@ button {
     font-size: 0.95rem;
   }
 
-  /* JOSE reads larger on small screens; still fits inside the C */
+  /* JOSE reads larger on small screens, pulled in from the E */
+  .wordmark {
+    --jose-inset: 0.05;
+  }
+
   .wordmark__name {
     font-size: 0.14em;
+  }
+
+  /* Small type on mobile: no letter-spacing */
+  .site-header__nav,
+  .footer__nav,
+  .project-ui__client,
+  .about__label,
+  .experience,
+  .experience__label {
+    letter-spacing: 0;
   }
 
   /* Full-bleed viewer starts below the nav so the links never sit on the image */

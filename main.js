@@ -88,7 +88,9 @@
     // Glyph origin and baseline inside the wordmark (offsetParent)
     const originX = offsetWithin(glyph, el).left
     const baseline = offsetWithin(probe, el).top
-    const rightX = originX + cRight // where the C's terminals end
+    // Where the C's terminals end, pulled in by --jose-inset (wordmark em)
+    const inset = parseFloat(getComputedStyle(el).getPropertyValue("--jose-inset")) || 0
+    const rightX = originX + cRight - inset * size
     const centerY = baseline + (cTop + cBottom) / 2
 
     // JOSE's own ink box (with its letter-spacing) inside its line box
@@ -582,6 +584,279 @@
   /* ------------------------------------------------------------------------
      Intro: wordmark letters rise once fonts are ready
      ------------------------------------------------------------------------ */
+  /* ------------------------------------------------------------------------
+     Hero wordmark hover: "Mouse Grid" displacement (WebGL2)
+     Ported from the 27b logo experiment. A coarse grid remembers the
+     pointer's velocity and decays each frame; a shader reads the text
+     stencil offset by each cell's value, so blocks of MACENA shear
+     along the mouse path. The canvas only replaces the DOM text while
+     the effect is alive, so the intro, scroll fade and a11y stay intact.
+     ------------------------------------------------------------------------ */
+  const WORDMARK_FX = {
+    gridSize: 52, // cells across the viewport (as in the full-screen original)
+    mouseRadius: 0.192,
+    dissipation: 0.94,
+    strength: 1.89,
+  }
+
+  function initWordmarkFx() {
+    if (reduceMotion || !finePointer.matches) return
+    const mark = $(".hero .wordmark")
+    const wrap = mark?.parentElement
+    if (!wrap) return
+
+    const canvas = document.createElement("canvas")
+    canvas.className = "wordmark-fx"
+    canvas.setAttribute("aria-hidden", "true")
+    const gl = canvas.getContext("webgl2", { alpha: true, premultipliedAlpha: false, antialias: false })
+    if (!gl) return
+    wrap.appendChild(canvas)
+
+    const VERT = `#version 300 es
+    in vec2 aPos;
+    out vec2 vUv;
+    void main() { vUv = aPos * 0.5 + 0.5; gl_Position = vec4(aPos, 0.0, 1.0); }`
+
+    const FRAG = `#version 300 es
+    precision highp float;
+    in vec2 vUv;
+    out vec4 outColor;
+    uniform sampler2D uLogo;  // alpha = ink
+    uniform sampler2D uGrid;  // rg = push (in viewport units)
+    uniform float uStrength;
+    uniform vec2 uScale;      // viewport px / canvas px: keeps offsets viewport-relative
+    uniform vec3 uFg;
+    float ink(vec2 uv) {
+      if (uv.x < 0.0 || uv.x > 1.0 || uv.y < 0.0 || uv.y > 1.0) return 0.0;
+      return texture(uLogo, uv).a;
+    }
+    void main() {
+      vec2 offset = texture(uGrid, vUv).rg * 0.02 * uStrength * uScale;
+      outColor = vec4(uFg, ink(vUv - offset));
+    }`
+
+    const compile = (type, src) => {
+      const sh = gl.createShader(type)
+      gl.shaderSource(sh, src)
+      gl.compileShader(sh)
+      if (!gl.getShaderParameter(sh, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(sh))
+      return sh
+    }
+    const program = gl.createProgram()
+    try {
+      gl.attachShader(program, compile(gl.VERTEX_SHADER, VERT))
+      gl.attachShader(program, compile(gl.FRAGMENT_SHADER, FRAG))
+      gl.linkProgram(program)
+      if (!gl.getProgramParameter(program, gl.LINK_STATUS)) throw new Error("link")
+    } catch (_) {
+      canvas.remove()
+      return
+    }
+    gl.useProgram(program)
+
+    const quad = gl.createBuffer()
+    gl.bindBuffer(gl.ARRAY_BUFFER, quad)
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, -1, 1, 1, -1, 1, 1]), gl.STATIC_DRAW)
+    const aPos = gl.getAttribLocation(program, "aPos")
+    gl.enableVertexAttribArray(aPos)
+    gl.vertexAttribPointer(aPos, 2, gl.FLOAT, false, 0, 0)
+
+    const u = {}
+    for (const n of ["uLogo", "uGrid", "uStrength", "uScale", "uFg"]) u[n] = gl.getUniformLocation(program, n)
+    gl.uniform1i(u.uLogo, 0)
+    gl.uniform1i(u.uGrid, 1)
+    gl.uniform1f(u.uStrength, WORDMARK_FX.strength)
+    gl.enable(gl.BLEND)
+    gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
+
+    const logoTex = gl.createTexture()
+    const gridTex = gl.createTexture()
+    const stencil = document.createElement("canvas")
+    const sctx = stencil.getContext("2d")
+
+    let cols = 0
+    let rows = 0
+    let cellW = 1
+    let cellH = 1
+    let grid = new Float32Array(0)
+    let dpr = 1
+
+    // Size the canvas over the wordmark (plus margin for displaced ink) and
+    // redraw the stencil from the live DOM layout, so it matches exactly.
+    function layout() {
+      const fs = parseFloat(mark.style.fontSize) || parseFloat(getComputedStyle(mark).fontSize)
+      const margin = Math.round(fs * 0.14)
+      canvas.style.left = `${-margin}px`
+      canvas.style.top = `${-margin}px`
+      canvas.style.width = `calc(100% + ${margin * 2}px)`
+      canvas.style.height = `calc(100% + ${margin * 2}px)`
+
+      const box = canvas.getBoundingClientRect()
+      dpr = Math.min(window.devicePixelRatio || 1, 2)
+      canvas.width = stencil.width = Math.round(box.width * dpr)
+      canvas.height = stencil.height = Math.round(box.height * dpr)
+      gl.viewport(0, 0, canvas.width, canvas.height)
+
+      // Text stencil: each glyph at its real position and baseline
+      sctx.setTransform(dpr, 0, 0, dpr, 0, 0)
+      sctx.clearRect(0, 0, box.width, box.height)
+      sctx.fillStyle = "#000"
+      sctx.textBaseline = "alphabetic"
+      const style = getComputedStyle(mark)
+      sctx.font = `${style.fontWeight} ${fs}px ${style.fontFamily}`
+      const baseline = $(".wordmark__probe", mark).getBoundingClientRect().top - box.top
+      $$("[data-letter]", mark).forEach((glyph) => {
+        const r = glyph.getBoundingClientRect()
+        sctx.fillText(glyph.textContent.trim(), r.left - box.left, baseline)
+      })
+
+      const name = $(".wordmark__name", mark)
+      const ns = getComputedStyle(name)
+      const n = parseFloat(ns.fontSize)
+      sctx.font = `${ns.fontWeight} ${n}px ${ns.fontFamily}`
+      const m = sctx.measureText("JOSE")
+      const asc = m.fontBoundingBoxAscent ?? m.actualBoundingBoxAscent
+      const desc = m.fontBoundingBoxDescent ?? m.actualBoundingBoxDescent
+      const lh = parseFloat(ns.lineHeight) || n
+      const nr = name.getBoundingClientRect()
+      const nBase = nr.top - box.top + (lh - (asc + desc)) / 2 + asc
+      const ls = parseFloat(ns.letterSpacing) || 0
+      let x = nr.left - box.left
+      for (const ch of name.textContent.trim()) {
+        sctx.fillText(ch, x, nBase)
+        x += sctx.measureText(ch).width + ls
+      }
+
+      gl.activeTexture(gl.TEXTURE0)
+      gl.bindTexture(gl.TEXTURE_2D, logoTex)
+      gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true)
+      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, stencil)
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR)
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
+
+      // Grid cells keep the original's on-screen size (viewport / gridSize)
+      cellW = window.innerWidth / WORDMARK_FX.gridSize
+      cellH = window.innerHeight / WORDMARK_FX.gridSize
+      cols = Math.max(1, Math.ceil(box.width / cellW))
+      rows = Math.max(1, Math.ceil(box.height / cellH))
+      grid = new Float32Array(cols * rows * 4)
+      gl.activeTexture(gl.TEXTURE1)
+      gl.bindTexture(gl.TEXTURE_2D, gridTex)
+      gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false)
+      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA16F, cols, rows, 0, gl.RGBA, gl.FLOAT, grid)
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST)
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
+
+      gl.uniform2f(u.uScale, window.innerWidth / box.width, window.innerHeight / box.height)
+      const fg = getComputedStyle(mark).color.match(/\d+(\.\d+)?/g).slice(0, 3).map((v) => v / 255)
+      gl.uniform3f(u.uFg, fg[0], fg[1], fg[2])
+    }
+
+    // Pointer state in canvas px (y measured from the bottom, like the shader)
+    const mouse = { x: 0, y: 0, vx: 0, vy: 0, px: null, py: null }
+    let hovering = false
+    let active = false
+    let raf = 0
+
+    const onMove = (event) => {
+      const box = canvas.getBoundingClientRect()
+      const x = event.clientX - box.left
+      const y = box.bottom - event.clientY
+      if (mouse.px !== null) {
+        // Velocity normalised to the viewport, as in the full-screen original
+        mouse.vx = (x - mouse.px) / window.innerWidth
+        mouse.vy = (y - mouse.py) / window.innerHeight
+      }
+      mouse.x = mouse.px = x
+      mouse.y = mouse.py = y
+    }
+
+    function step() {
+      const { mouseRadius, dissipation, gridSize } = WORDMARK_FX
+      const maxDist = gridSize * mouseRadius
+      const aspect = cellW / cellH
+      const mx = mouse.x / cellW
+      const my = mouse.y / cellH
+      const moving = Math.min(1, Math.hypot(mouse.vx, mouse.vy) * 60)
+      let energy = 0
+
+      for (let j = 0; j < rows; j++) {
+        for (let i = 0; i < cols; i++) {
+          const k = 4 * (i + cols * j)
+          grid[k] *= dissipation
+          grid[k + 1] *= dissipation
+          grid[k + 2] *= dissipation
+          if (hovering) {
+            const dx = (mx - i - 0.5) * aspect
+            const dy = my - j - 0.5
+            const d2 = dx * dx + dy * dy
+            if (d2 < maxDist * maxDist) {
+              const power = Math.min(maxDist / Math.sqrt(d2 || 1e-4), 10)
+              grid[k] += mouse.vx * 100 * power
+              grid[k + 1] += mouse.vy * 100 * power
+              grid[k + 2] = Math.min(1, grid[k + 2] + moving * (1 - Math.sqrt(d2) / maxDist))
+            }
+          }
+          energy = Math.max(energy, Math.abs(grid[k]), Math.abs(grid[k + 1]))
+        }
+      }
+      mouse.vx *= 0.9
+      mouse.vy *= 0.9
+
+      gl.activeTexture(gl.TEXTURE1)
+      gl.bindTexture(gl.TEXTURE_2D, gridTex)
+      gl.texSubImage2D(gl.TEXTURE_2D, 0, 0, 0, cols, rows, gl.RGBA, gl.FLOAT, grid)
+      gl.clearColor(0, 0, 0, 0)
+      gl.clear(gl.COLOR_BUFFER_BIT)
+      gl.drawArrays(gl.TRIANGLES, 0, 6)
+
+      // Settled and pointer gone: hand back to the DOM text
+      if (!hovering && energy < 0.002) return stop()
+      raf = requestAnimationFrame(step)
+    }
+
+    function start() {
+      if (active) return
+      // Show the canvas first: it must have a size before layout() measures it
+      wrap.classList.add("is-fx")
+      layout()
+      active = true
+      raf = requestAnimationFrame(step)
+    }
+    function stop() {
+      active = false
+      cancelAnimationFrame(raf)
+      wrap.classList.remove("is-fx")
+      grid.fill(0)
+    }
+
+    wrap.addEventListener("pointerenter", (event) => {
+      if (!introDone || event.pointerType !== "mouse") return
+      // Only while the wordmark is actually on screen at the top
+      if (heroTl.scrollTrigger.progress > 0.2) return
+      hovering = true
+      mouse.px = mouse.py = null
+      start()
+      onMove(event)
+    })
+    wrap.addEventListener("pointermove", (event) => {
+      if (hovering) onMove(event)
+    })
+    wrap.addEventListener("pointerleave", () => {
+      hovering = false
+      mouse.px = mouse.py = null
+    })
+    window.addEventListener("resize", () => {
+      if (active) stop()
+    })
+  }
+
+  initWordmarkFx()
+
   const root = document.documentElement
   const fontsReady = document.fonts ? document.fonts.ready : Promise.resolve()
 
