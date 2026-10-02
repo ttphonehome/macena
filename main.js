@@ -240,6 +240,20 @@
 
   gsap.set(frame, { visibility: "visible" })
 
+  // Very subtle scroll parallax: images drift ±3% inside the frame from the
+  // top of the hero until it has scrolled away (uses the 6% CSS bleed)
+  if (!reduceMotion) {
+    gsap.fromTo(
+      slides,
+      { yPercent: -3 },
+      {
+        yPercent: 3,
+        ease: "none",
+        scrollTrigger: { trigger: hero, start: "top top", end: "bottom top", scrub: true },
+      },
+    )
+  }
+
   /* ---------- Project carousel ---------- */
   const clientOut = $("[data-client-out]")
   const blurbOut = $("[data-blurb-out]")
