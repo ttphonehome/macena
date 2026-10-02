@@ -690,6 +690,7 @@ button {
 
 .experience__list {
   width: 100%;
+  text-transform: uppercase;
 }
 
 .experience__row {
@@ -711,7 +712,6 @@ button {
   text-align: center;
 }
 
-/* Full black on desktop; softened to 40% on mobile (see mobile block) */
 .experience__years {
   text-align: right;
 }
@@ -729,7 +729,7 @@ button {
 .footer {
   position: relative;
   display: flex;
-  min-height: 85svh;
+  min-height: 68svh; /* 20% shorter than the original 85svh */
   flex-direction: column;
   justify-content: flex-end;
   padding: 0 var(--pad) max(var(--pad), env(safe-area-inset-bottom));
@@ -752,15 +752,13 @@ button {
   line-height: 1;
 }
 
-.footer__nav > :last-child {
-  text-align: right;
+/* LinkedIn left, Instagram centre, X right */
+.footer__nav > :nth-child(2) {
+  justify-self: center;
 }
 
-.footer__social {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.15em;
+.footer__nav > :last-child {
+  justify-self: end;
 }
 
 /* ==========================================================================
@@ -835,7 +833,8 @@ button {
 
   /* Experience: studio leads, years right, role as a quiet second line */
   .experience {
-    padding-bottom: 5rem;
+    gap: 1.5rem;
+    padding-bottom: 4rem;
     font-size: 1.15rem;
   }
 
@@ -863,7 +862,6 @@ button {
 
   .experience__years {
     grid-area: years;
-    opacity: 0.4;
     font-size: 0.875rem;
   }
 
@@ -871,12 +869,11 @@ button {
     grid-area: role;
     font-size: 0.7rem;
     letter-spacing: 0.02em;
-    opacity: 0.55;
   }
 
-  /* Footer: nav flows above the wordmark */
+  /* Footer: nav flows above the wordmark; 20% shorter than before (60svh) */
   .footer {
-    min-height: 60svh;
+    min-height: 48svh;
     justify-content: space-between;
     gap: 3rem;
     padding-top: 1.25rem;
@@ -887,12 +884,14 @@ button {
     font-size: 0.95rem;
   }
 
-  .footer__nav > p {
-    font-size: 0.8rem;
+  /* JOSE reads larger on small screens; still fits inside the C */
+  .wordmark__name {
+    font-size: 0.14em;
   }
 
-  .footer__social {
-    gap: 0.75rem;
+  /* Full-bleed viewer starts below the nav so the links never sit on the image */
+  .hero__frame {
+    inset: calc(max(1rem, env(safe-area-inset-top)) + 1.9rem) var(--frame-inset) var(--frame-inset);
   }
 }
 

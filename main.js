@@ -563,7 +563,7 @@
     const footer = $("[data-footer]")
     const footerTl = gsap.timeline({
       paused: true,
-      scrollTrigger: { trigger: footer, start: "top 75%", once: true },
+      scrollTrigger: { trigger: footer, start: "top 90%", once: true },
     })
     footerTl
       .fromTo(
