@@ -733,7 +733,7 @@ button {
 }
 
 @media (hover: hover) {
-  .experience__row:hover {
+  a.experience__row:hover {
     padding-inline: clamp(0.5rem, 1vw, 1rem);
     color: var(--white);
     background: var(--black);
