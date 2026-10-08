@@ -820,6 +820,42 @@
   initWordmarkFx()
 
   /* ------------------------------------------------------------------------
+     Email link: mailto opens the visitor's mail app. If nothing happens (no
+     mail app configured) copy the address instead so the click is never dead.
+     ------------------------------------------------------------------------ */
+  const toast = $("[data-toast]")
+  let toastTimer = 0
+  const showToast = (message) => {
+    if (!toast) return
+    toast.textContent = message
+    toast.classList.add("is-visible")
+    clearTimeout(toastTimer)
+    toastTimer = setTimeout(() => toast.classList.remove("is-visible"), 2600)
+  }
+  $$("[data-email]").forEach((link) => {
+    link.addEventListener("click", () => {
+      const address = link.getAttribute("href").replace(/^mailto:/i, "").split("?")[0]
+      let handedOff = false
+      const mark = () => {
+        handedOff = true
+      }
+      window.addEventListener("blur", mark, { once: true })
+      document.addEventListener("visibilitychange", mark, { once: true })
+      setTimeout(async () => {
+        window.removeEventListener("blur", mark)
+        document.removeEventListener("visibilitychange", mark)
+        if (handedOff) return
+        try {
+          await navigator.clipboard.writeText(address)
+          showToast(`Email copied — ${address}`)
+        } catch (_) {
+          showToast(address)
+        }
+      }, 900)
+    })
+  })
+
+  /* ------------------------------------------------------------------------
      Footer clock: the visitor's local time, ticking every second
      ------------------------------------------------------------------------ */
   const clock = $("[data-clock]")

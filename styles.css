@@ -460,6 +460,10 @@ button {
 }
 
 .availability {
+  /* Above the wordmark: its boxes are vertically centred on a zero-height
+     line, so on phones they reach up over this link and swallowed taps */
+  position: relative;
+  z-index: 3;
   display: inline-block;
   margin-bottom: max(0.4vw, 0.4rem);
   font-size: var(--fs-small);
@@ -1025,4 +1029,32 @@ button {
   html:not(.lenis) {
     scroll-behavior: auto;
   }
+}
+
+/* ---------- Toast (e.g. "email copied") ---------- */
+
+.toast {
+  position: fixed;
+  z-index: 120;
+  left: 50%;
+  bottom: max(1.5rem, env(safe-area-inset-bottom));
+  padding: 0.7rem 1rem;
+  color: var(--white);
+  background: var(--black);
+  font-size: var(--fs-small);
+  letter-spacing: 0;
+  line-height: 1;
+  text-transform: uppercase;
+  white-space: nowrap;
+  opacity: 0;
+  transform: translate(-50%, 0.75rem);
+  pointer-events: none;
+  transition:
+    opacity 0.3s,
+    transform 0.4s var(--ease-out);
+}
+
+.toast.is-visible {
+  opacity: 1;
+  transform: translate(-50%, 0);
 }
