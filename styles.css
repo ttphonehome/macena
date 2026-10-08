@@ -614,9 +614,10 @@ button {
   }
 }
 
-/* Touch devices: buttons + swipe; no zones or custom cursor */
+/* Touch devices: swipe, tap either side of the image, or use the buttons.
+   The side zones stay (invisible, under the copy and buttons); only the
+   custom cursor goes. */
 @media not ((hover: hover) and (pointer: fine)) {
-  .project-ui__zone,
   .project-ui__cursor {
     display: none;
   }

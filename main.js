@@ -289,8 +289,13 @@
       }, 0.4)
   }
 
-  $$("[data-prev]", ui).forEach((btn) => btn.addEventListener("click", () => go(-1)))
-  $$("[data-next]", ui).forEach((btn) => btn.addEventListener("click", () => go(1)))
+  // A swipe must not also register as a tap on the side it started on
+  const tap = (direction) => () => {
+    if (performance.now() - lastSwipeAt < 500) return
+    go(direction)
+  }
+  $$("[data-prev]", ui).forEach((btn) => btn.addEventListener("click", tap(-1)))
+  $$("[data-next]", ui).forEach((btn) => btn.addEventListener("click", tap(1)))
 
   // Keyboard: arrows when the viewer is on screen
   window.addEventListener("keydown", (event) => {
@@ -301,6 +306,7 @@
 
   // Touch swipe (horizontal only; vertical pans scroll the page)
   let swipe = null
+  let lastSwipeAt = 0
   ui.addEventListener("pointerdown", (event) => {
     if (event.pointerType === "mouse") return
     swipe = { x: event.clientX, y: event.clientY }
@@ -310,7 +316,10 @@
     const dx = event.clientX - swipe.x
     const dy = event.clientY - swipe.y
     swipe = null
-    if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy) * 1.2) go(dx < 0 ? 1 : -1)
+    if (Math.abs(dx) > 28 && Math.abs(dx) > Math.abs(dy) * 1.1) {
+      lastSwipeAt = performance.now()
+      go(dx < 0 ? 1 : -1)
+    }
   })
   ui.addEventListener("pointercancel", () => {
     swipe = null
@@ -1046,7 +1055,10 @@
 
       gsap
         .timeline({ onComplete: finish })
-        .to(introLetters, { yPercent: -110, duration: 0.7, ease: "expo.in", stagger: 0.025 }, 0)
+        // -160%: the J's descender dips below the baseline, so -110% left its tail
+        // visible inside the mask; then hide the letters outright once they're gone
+        .to(introLetters, { yPercent: -160, duration: 0.7, ease: "expo.in", stagger: 0.025 }, 0)
+        .set(introLetters, { autoAlpha: 0 }, 1.0)
         .to(
           media,
           { left: to.left, top: to.top, width: to.width, height: to.height, duration: 1.25, ease: "expo.inOut" },
