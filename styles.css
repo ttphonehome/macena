@@ -955,22 +955,29 @@ button {
 
   .footer__nav {
     position: static;
-    font-size: 0.95rem;
+    font-size: 0.8rem;
   }
 
+  /* Two stacked pairs, no clock: "SITE BY / TOMÁS LOURO" left,
+     "COLOPHON: / FACULTY GLYPHIC" right */
   .footer__meta {
-    grid-template-columns: auto auto;
-    row-gap: 0.4rem;
-    font-size: 0.65rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    font-size: 0.55rem;
+    line-height: 1.25;
   }
 
   .footer__meta > :nth-child(2) {
-    text-align: right;
+    display: none;
   }
 
   .footer__meta > :last-child {
-    grid-column: 1 / -1;
-    text-align: left;
+    text-align: right;
+  }
+
+  .footer__meta a {
+    display: block;
   }
 
   /* Small type on mobile: no letter-spacing */

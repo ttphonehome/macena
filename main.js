@@ -60,11 +60,31 @@
     const size = (100 * width) / ink
     el.style.fontSize = `${size}px`
     el.style.marginLeft = `${(-left * size) / 100}px`
+    el.dataset.fitWidth = String(width) // the container width this size was fitted to
   }
 
   const wordmarks = $$("[data-fit]")
   const fitAll = () => wordmarks.forEach(fitWordmark)
   fitAll()
+
+  // Refit whenever a container's width really differs from the width its text
+  // was fitted to (window resize, scrollbar appearing, rotation, ...). Driven
+  // by the container, not by which resize event happened to come last.
+  let fitFrame = 0
+  const fitObserver = new ResizeObserver(() => {
+    cancelAnimationFrame(fitFrame)
+    fitFrame = requestAnimationFrame(() => {
+      let changed = false
+      for (const el of wordmarks) {
+        if (el.parentElement.clientWidth !== Number(el.dataset.fitWidth)) {
+          fitWordmark(el)
+          changed = true
+        }
+      }
+      if (changed) ScrollTrigger.refresh()
+    })
+  })
+  wordmarks.forEach((el) => fitObserver.observe(el.parentElement))
 
   let lastWidth = window.innerWidth
   let lastHeight = window.innerHeight
@@ -79,7 +99,7 @@
     lastHeight = window.innerHeight
     clearTimeout(resizeTimer)
     resizeTimer = setTimeout(() => {
-      if (widthChanged) fitAll()
+      fitAll() // always: cheap, and never skipped by the last event's flags
       ScrollTrigger.refresh()
     }, 150)
   })
