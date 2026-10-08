@@ -333,7 +333,7 @@
       index = (index + 1) % total
       restack(index)
       writeCopy(index)
-    }, 600)
+    }, 480) // one image every 0.48s (was 0.6s)
   }
 
   /* ---------- Chevron cursor (fine pointers) ---------- */
