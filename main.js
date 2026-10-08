@@ -446,7 +446,7 @@
 
   // Copy: lines rise in on scroll (all devices)
   if (!reduceMotion) {
-    for (const el of $$("[data-split-lines], [data-bio]")) {
+    for (const el of $$("[data-split-lines]")) {
       SplitText.create(el, {
         type: "lines",
         mask: "lines",

@@ -640,7 +640,7 @@ button {
   z-index: 2;
   top: 0;
   left: 0;
-  width: clamp(8rem, 13vw, 14rem);
+  width: clamp(8.8rem, 14.3vw, 15.4rem); /* +10% */
   aspect-ratio: 339 / 369;
   overflow: hidden;
   pointer-events: none;
@@ -656,8 +656,7 @@ button {
 }
 
 .about__label,
-.about__copy,
-.about__bio {
+.about__copy {
   position: relative;
   z-index: 3;
 }
@@ -665,15 +664,6 @@ button {
 .about__label {
   font-size: var(--fs-nav);
   letter-spacing: -0.02em;
-}
-
-.about__bio {
-  max-width: 52rem;
-  margin-top: clamp(0.5rem, 1.2vw, 1.5rem);
-  font-size: clamp(1rem, 1.5vw, 1.6rem);
-  letter-spacing: 0;
-  line-height: 1.25;
-  text-wrap: balance;
 }
 
 .about__copy {
@@ -691,8 +681,7 @@ button {
   }
 
   .about__label,
-  .about__copy,
-  .about__bio {
+  .about__copy {
     color: var(--white);
     mix-blend-mode: difference;
   }
@@ -785,18 +774,23 @@ button {
   min-height: 68svh; /* 20% shorter than the original 85svh */
   flex-direction: column;
   justify-content: flex-end;
-  padding: 0 var(--pad) max(var(--pad), env(safe-area-inset-bottom));
+  padding: 0 var(--pad) max(clamp(1.4rem, 2.6vw, 2.8rem), env(safe-area-inset-bottom));
   overflow: hidden;
   color: var(--white);
   background: var(--black);
 }
 
 .footer__meta {
+  /* Above the wordmark: its tall letter boxes otherwise sit on top of
+     this row and swallow the clicks */
+  position: relative;
+  z-index: 2;
   display: grid;
   grid-template-columns: 1fr auto 1fr;
   gap: 1rem;
   align-items: baseline;
-  margin-top: clamp(0.6rem, 1vw, 1.1rem);
+  margin-top: clamp(1.1rem, 1.9vw, 2.1rem);
+  padding-top: 0.25rem;
   font-size: var(--fs-small);
   letter-spacing: 0;
   line-height: 1.1;
@@ -813,14 +807,18 @@ button {
 }
 
 .footer__meta a {
-  text-decoration: underline;
-  text-underline-offset: 0.18em;
-  text-decoration-thickness: 0.07em;
+  text-decoration: none;
+  transition: opacity 0.25s;
 }
 
 .footer__meta a:hover,
 .footer__meta a:focus-visible {
-  text-decoration-thickness: 0.14em;
+  opacity: 0.55;
+}
+
+/* The footer wordmark is decorative: never let it intercept the pointer */
+.footer .wordmark {
+  pointer-events: none;
 }
 
 .footer__nav {
