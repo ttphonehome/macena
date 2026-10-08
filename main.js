@@ -960,10 +960,16 @@
     /* ---- 2. Close-in: image shrinks inline, words slide together ---- */
     function closeIn() {
       fitAll()
-      const fs = parseFloat(getComputedStyle(row).fontSize)
+      const fs0 = parseFloat(getComputedStyle(row).fontSize)
+      // Size the closed-in row to fit the screen whatever the typeface: wide
+      // faces (Unbounded, Ultra) shrink slightly, narrow ones keep full size.
+      // Row width = words + inline image (1.2em) + its margins (0.16em).
+      const wordsW = $$(".intro__word", overlay).reduce((sum, w) => sum + w.getBoundingClientRect().width, 0)
+      const fs = Math.min(fs0, (window.innerWidth * 0.94) / (wordsW / fs0 + 1.36))
       gsap
         .timeline()
         .to(countWrap.children, { yPercent: -110, duration: 0.5, ease: "power3.in", stagger: 0.04 }, 0)
+        .to(row, { fontSize: fs, duration: 1.2, ease: "expo.inOut" }, 0.1)
         .to(media, { width: fs * 1.2, height: fs * 0.72, duration: 1.2, ease: "expo.inOut" }, 0.1)
         .call(
           () => {

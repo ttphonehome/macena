@@ -27,12 +27,14 @@
         root.classList.add("js")
 
         // A different typeface on every load (never the same one twice in a row).
-        // Preview a specific one with ?font=inter-tight | space-grotesk | archivo | bricolage
+        // Preview a specific one with ?font=pirata-one | syne | ultra | faculty-glyphic | unbounded | archivo
         var FONTS = {
-          "inter-tight": "inter-tight-800.woff2",
-          "space-grotesk": "space-grotesk-700.woff2",
+          "pirata-one": "pirata-one-400.woff2",
+          syne: "syne-800.woff2",
+          ultra: "ultra-400.woff2",
+          "faculty-glyphic": "faculty-glyphic-400.woff2",
+          unbounded: "unbounded-900.woff2",
           archivo: "archivo-800.woff2",
-          bricolage: "bricolage-800.woff2",
         }
         var keys = Object.keys(FONTS)
         var forced = new URLSearchParams(location.search).get("font")

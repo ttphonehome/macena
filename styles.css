@@ -6,29 +6,43 @@
 /* ---------- Typefaces (self-hosted; one is picked at random per load) ---------- */
 
 @font-face {
-  font-family: "Inter Tight";
-  src: url("assets/fonts/inter-tight-800.woff2") format("woff2");
+  font-family: "Pirata One";
+  src: url("assets/fonts/pirata-one-400.woff2") format("woff2");
+  font-weight: 400;
+  font-display: block;
+}
+
+@font-face {
+  font-family: "Syne";
+  src: url("assets/fonts/syne-800.woff2") format("woff2");
   font-weight: 800;
   font-display: block;
 }
 
 @font-face {
-  font-family: "Space Grotesk";
-  src: url("assets/fonts/space-grotesk-700.woff2") format("woff2");
-  font-weight: 700;
+  font-family: "Ultra";
+  src: url("assets/fonts/ultra-400.woff2") format("woff2");
+  font-weight: 400;
+  font-display: block;
+}
+
+@font-face {
+  font-family: "Faculty Glyphic";
+  src: url("assets/fonts/faculty-glyphic-400.woff2") format("woff2");
+  font-weight: 400;
+  font-display: block;
+}
+
+@font-face {
+  font-family: "Unbounded";
+  src: url("assets/fonts/unbounded-900.woff2") format("woff2");
+  font-weight: 900;
   font-display: block;
 }
 
 @font-face {
   font-family: "Archivo";
   src: url("assets/fonts/archivo-800.woff2") format("woff2");
-  font-weight: 800;
-  font-display: block;
-}
-
-@font-face {
-  font-family: "Bricolage Grotesque";
-  src: url("assets/fonts/bricolage-800.woff2") format("woff2");
   font-weight: 800;
   font-display: block;
 }
@@ -41,21 +55,46 @@
   unicode-range: U+2197;
 }
 
+/* Per typeface: family, real weight, wordmark tracking and line-height */
 :root {
-  --font: "Inter Tight";
+  --font: "Archivo";
+  --fw: 800;
+  --tracking: -0.03em;
 }
 
-html[data-font="space-grotesk"] {
-  --font: "Space Grotesk";
-  --fw: 700;
+html[data-font="pirata-one"] {
+  --font: "Pirata One";
+  --fw: 400;
+  --tracking: 0;
+}
+
+html[data-font="syne"] {
+  --font: "Syne";
+  --fw: 800;
+  --tracking: -0.03em;
+}
+
+html[data-font="ultra"] {
+  --font: "Ultra";
+  --fw: 400;
+  --tracking: -0.02em;
+}
+
+html[data-font="faculty-glyphic"] {
+  --font: "Faculty Glyphic";
+  --fw: 400;
+  --tracking: -0.02em;
+}
+
+html[data-font="unbounded"] {
+  --font: "Unbounded";
+  --fw: 900;
+  --tracking: -0.04em;
 }
 
 html[data-font="archivo"] {
   --font: "Archivo";
-}
-
-html[data-font="bricolage"] {
-  --font: "Bricolage Grotesque";
+  --fw: 800;
 }
 
 :root {
@@ -288,7 +327,7 @@ button {
   position: relative;
   display: inline-block;
   font-size: 23vw; /* replaced by JS fit-to-width */
-  letter-spacing: -0.03em;
+  letter-spacing: var(--tracking);
   line-height: 0.74;
   white-space: nowrap;
 }
@@ -381,7 +420,7 @@ button {
   display: flex;
   align-items: center;
   font-size: clamp(2.4rem, 11vw, 13rem);
-  letter-spacing: -0.03em;
+  letter-spacing: var(--tracking);
   line-height: 0.8;
   white-space: nowrap;
 }
