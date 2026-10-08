@@ -789,8 +789,7 @@ button {
   grid-template-columns: 1fr auto 1fr;
   gap: 1rem;
   align-items: baseline;
-  margin-top: clamp(1.1rem, 1.9vw, 2.1rem);
-  padding-top: 0.25rem;
+  margin-top: clamp(0.75rem, 1.1vw, 1.3rem); /* close under MACENA */
   font-size: var(--fs-small);
   letter-spacing: 0;
   line-height: 1.1;
@@ -948,9 +947,13 @@ button {
   /* Footer: nav flows above the wordmark; 20% shorter than before (60svh) */
   .footer {
     min-height: 48svh;
-    justify-content: space-between;
-    gap: 3rem;
+    justify-content: flex-start;
     padding-top: 1.25rem;
+  }
+
+  /* Wordmark and the row under it sit together at the bottom */
+  .footer__wordmark-wrap {
+    margin-top: auto;
   }
 
   .footer__nav {
@@ -961,6 +964,7 @@ button {
   /* Two stacked pairs, no clock: "SITE BY / TOMÁS LOURO" left,
      "COLOPHON: / FACULTY GLYPHIC" right */
   .footer__meta {
+    margin-top: 0.7rem;
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
