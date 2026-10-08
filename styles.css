@@ -3,6 +3,61 @@
    Static rebuild of the Figma Make prototype. GSAP + ScrollTrigger + Lenis.
    ========================================================================== */
 
+/* ---------- Typefaces (self-hosted; one is picked at random per load) ---------- */
+
+@font-face {
+  font-family: "Inter Tight";
+  src: url("assets/fonts/inter-tight-800.woff2") format("woff2");
+  font-weight: 800;
+  font-display: block;
+}
+
+@font-face {
+  font-family: "Space Grotesk";
+  src: url("assets/fonts/space-grotesk-700.woff2") format("woff2");
+  font-weight: 700;
+  font-display: block;
+}
+
+@font-face {
+  font-family: "Archivo";
+  src: url("assets/fonts/archivo-800.woff2") format("woff2");
+  font-weight: 800;
+  font-display: block;
+}
+
+@font-face {
+  font-family: "Bricolage Grotesque";
+  src: url("assets/fonts/bricolage-800.woff2") format("woff2");
+  font-weight: 800;
+  font-display: block;
+}
+
+/* The ↗ glyph always comes from Inter Tight so it matches in every typeface */
+@font-face {
+  font-family: "Arrow";
+  src: url("assets/fonts/inter-tight-arrow.woff2") format("woff2");
+  font-weight: 800;
+  unicode-range: U+2197;
+}
+
+:root {
+  --font: "Inter Tight";
+}
+
+html[data-font="space-grotesk"] {
+  --font: "Space Grotesk";
+  --fw: 700;
+}
+
+html[data-font="archivo"] {
+  --font: "Archivo";
+}
+
+html[data-font="bricolage"] {
+  --font: "Bricolage Grotesque";
+}
+
 :root {
   --black: #000;
   --white: #fff;
@@ -20,8 +75,8 @@
 
   --tap: 44px;
 
-  font-family: "Inter Tight", "Helvetica Neue", Arial, sans-serif;
-  font-weight: 800;
+  font-family: var(--font), "Helvetica Neue", Arial, sans-serif;
+  font-weight: var(--fw, 800);
   font-synthesis: none;
   color: var(--black);
   background: var(--white);
@@ -250,20 +305,6 @@ button {
   transform-origin: left bottom;
 }
 
-/* JOSE sits inside the C counter, sized relative to the wordmark.
-   JS (placeName) centres it on the C's measured glyph ink; these
-   values are only the pre-JS fallback. */
-.wordmark__name {
-  position: absolute;
-  top: 38%;
-  left: 39.5%;
-  /* Pure ratio of the wordmark so it always fits the C's counter */
-  font-size: 0.1em;
-  letter-spacing: 0;
-  line-height: 1;
-  white-space: nowrap;
-}
-
 /* Hero hover effect: the WebGL canvas stands in for the text while active */
 .wordmark-fx {
   position: absolute;
@@ -398,7 +439,6 @@ button {
   transform: translateY(110%);
 }
 
-.is-loading .hero__intro .wordmark__name,
 .is-loading .availability,
 .is-loading .site-header__nav > a {
   opacity: 0;
@@ -460,8 +500,9 @@ button {
   background-size: 100% 2px;
 }
 
-/* Force Inter Tight's own arrow (text presentation, never the emoji) */
+/* Dedicated arrow glyph (text presentation, never the emoji) */
 .arrow-glyph {
+  font-family: "Arrow", var(--font), sans-serif;
   font-variant-emoji: text;
 }
 
@@ -760,22 +801,13 @@ button {
   top: var(--pad);
   left: var(--pad);
   right: var(--pad);
-  display: grid;
-  grid-template-columns: 1fr auto 1fr;
+  display: flex;
+  justify-content: space-between; /* LinkedIn left, Instagram right */
   gap: 1rem;
-  align-items: start;
+  align-items: flex-start;
   font-size: var(--fs-nav);
   letter-spacing: -0.02em;
   line-height: 1;
-}
-
-/* LinkedIn left, Instagram centre, X right */
-.footer__nav > :nth-child(2) {
-  justify-self: center;
-}
-
-.footer__nav > :last-child {
-  justify-self: end;
 }
 
 /* ==========================================================================
@@ -899,15 +931,6 @@ button {
   .footer__nav {
     position: static;
     font-size: 0.95rem;
-  }
-
-  /* JOSE reads larger on small screens, pulled in from the E */
-  .wordmark {
-    --jose-inset: 0.05;
-  }
-
-  .wordmark__name {
-    font-size: 0.14em;
   }
 
   /* Small type on mobile: no letter-spacing */

@@ -60,75 +60,6 @@
     const size = (100 * width) / ink
     el.style.fontSize = `${size}px`
     el.style.marginLeft = `${(-left * size) / 100}px`
-    placeName(el, style, size)
-  }
-
-  /**
-   * Centre "JOSE" on the C's inked glyph (not its line box, which the
-   * 0.74 line-height pushes off-centre). Uses offsetTop/Left so it is
-   * unaffected by the letters' entrance transforms.
-   */
-  function placeName(el, style, size) {
-    const name = $(".wordmark__name", el)
-    const probe = $(".wordmark__probe", el)
-    if (!name || !probe) return
-    const glyph = probe.parentElement // inner span holding "C"
-    const font = `${style.fontWeight} 100px ${style.fontFamily}`
-    measureCtx.font = font
-    if ("letterSpacing" in measureCtx) measureCtx.letterSpacing = "0px"
-    const k = size / 100
-
-    // C ink box relative to its glyph origin / baseline
-    const c = measureCtx.measureText("C")
-    const cLeft = -c.actualBoundingBoxLeft * k
-    const cRight = c.actualBoundingBoxRight * k
-    const cTop = -c.actualBoundingBoxAscent * k
-    const cBottom = c.actualBoundingBoxDescent * k
-
-    // Glyph origin and baseline inside the wordmark (offsetParent)
-    const originX = offsetWithin(glyph, el).left
-    const baseline = offsetWithin(probe, el).top
-    // Where the C's terminals end, pulled in by --jose-inset (wordmark em)
-    const inset = parseFloat(getComputedStyle(el).getPropertyValue("--jose-inset")) || 0
-    const rightX = originX + cRight - inset * size
-    const centerY = baseline + (cTop + cBottom) / 2
-
-    // JOSE's own ink box (with its letter-spacing) inside its line box
-    const nameStyle = getComputedStyle(name)
-    const n = parseFloat(nameStyle.fontSize)
-    measureCtx.font = `${nameStyle.fontWeight} 100px ${nameStyle.fontFamily}`
-    if ("letterSpacing" in measureCtx) {
-      const ls = (parseFloat(nameStyle.letterSpacing) / n) * 100 || 0
-      measureCtx.letterSpacing = `${ls}px`
-    }
-    const j = measureCtx.measureText(name.textContent.trim())
-    const kn = n / 100
-    const ascent = (j.fontBoundingBoxAscent ?? j.actualBoundingBoxAscent) * kn
-    const descent = (j.fontBoundingBoxDescent ?? j.actualBoundingBoxDescent) * kn
-    const lineHeight = parseFloat(nameStyle.lineHeight) || n
-    const nameBaseline = (lineHeight - (ascent + descent)) / 2 + ascent
-    const nameInkMid =
-      nameBaseline - ((j.actualBoundingBoxAscent - j.actualBoundingBoxDescent) * kn) / 2
-
-    // Right-align JOSE's inked E to the C's right edge (ignore side bearing)
-    const nameInkRight = j.actualBoundingBoxRight * kn
-    name.style.left = `${rightX - nameInkRight}px`
-    name.style.top = `${centerY - nameInkMid}px`
-    name.style.right = "auto"
-    gsap.set(name, { xPercent: 0, transformOrigin: "100% 50%" })
-  }
-
-  // Offset of `node` relative to `ancestor`, ignoring CSS transforms
-  function offsetWithin(node, ancestor) {
-    let left = 0
-    let top = 0
-    let current = node
-    while (current && current !== ancestor) {
-      left += current.offsetLeft
-      top += current.offsetTop
-      current = current.offsetParent
-    }
-    return { left, top }
   }
 
   const wordmarks = $$("[data-fit]")
@@ -587,12 +518,6 @@
         { yPercent: 110, rotate: 6 },
         { yPercent: 0, rotate: 0, ease: "expo.out", duration: 1.3, stagger: 0.07 },
       )
-      .fromTo(
-        "[data-footer-name]",
-        { autoAlpha: 0, y: 20 },
-        { autoAlpha: 1, y: 0, duration: 0.8, ease: "power3.out" },
-        0.6,
-      )
   }
 
   /* ------------------------------------------------------------------------
@@ -723,23 +648,6 @@
         const r = glyph.getBoundingClientRect()
         sctx.fillText(glyph.textContent.trim(), r.left - box.left, baseline)
       })
-
-      const name = $(".wordmark__name", mark)
-      const ns = getComputedStyle(name)
-      const n = parseFloat(ns.fontSize)
-      sctx.font = `${ns.fontWeight} ${n}px ${ns.fontFamily}`
-      const m = sctx.measureText("JOSE")
-      const asc = m.fontBoundingBoxAscent ?? m.actualBoundingBoxAscent
-      const desc = m.fontBoundingBoxDescent ?? m.actualBoundingBoxDescent
-      const lh = parseFloat(ns.lineHeight) || n
-      const nr = name.getBoundingClientRect()
-      const nBase = nr.top - box.top + (lh - (asc + desc)) / 2 + asc
-      const ls = parseFloat(ns.letterSpacing) || 0
-      let x = nr.left - box.left
-      for (const ch of name.textContent.trim()) {
-        sctx.fillText(ch, x, nBase)
-        x += sctx.measureText(ch).width + ls
-      }
 
       gl.activeTexture(gl.TEXTURE0)
       gl.bindTexture(gl.TEXTURE_2D, logoTex)
@@ -879,7 +787,16 @@
   initWordmarkFx()
 
   const root = document.documentElement
-  const fontsReady = document.fonts ? document.fonts.ready : Promise.resolve()
+  // Ready = the randomly chosen display font is actually loaded (3s cap)
+  const fontsReady = document.fonts
+    ? Promise.race([
+        Promise.all([
+          document.fonts.load(`${getComputedStyle(document.body).fontWeight} 100px ${getComputedStyle(document.body).fontFamily}`),
+          document.fonts.ready,
+        ]),
+        new Promise((resolve) => setTimeout(resolve, 3000)),
+      ])
+    : Promise.resolve()
 
   // Settle the wordmark once the real font is in, whatever happens next
   fontsReady.then(() => {
@@ -914,7 +831,6 @@
     const countOut = $("[data-intro-count-out]", overlay)
 
     const letters = $$("[data-letter]", hero)
-    const name = $(".wordmark__name", hero)
     const availability = $(".availability", hero)
     const navLinks = $$(".site-header__nav > a", header)
 
@@ -932,7 +848,6 @@
     // Hero pre-states. y: 0 discards the px offset GSAP parses from the
     // CSS translateY(110%) pre-state, so yPercent alone drives the letters.
     gsap.set(letters, { y: 0, yPercent: 110, rotate: 6 })
-    gsap.set(name, { autoAlpha: 0, scale: 0.4 })
     gsap.set(availability, { autoAlpha: 1, clipPath: "inset(0% 100% 0% 0%)" })
     gsap.set(navLinks, { autoAlpha: 0, yPercent: -120 })
     root.classList.remove("is-loading")
@@ -963,7 +878,6 @@
           0.35 * s,
         )
         .to(navLinks, { autoAlpha: 1, yPercent: 0, duration: 0.8, ease: "expo.out", stagger: 0.07 }, 0.45 * s)
-        .to(name, { autoAlpha: 1, scale: 1, duration: 0.7, ease: "back.out(2.2)" }, 0.7 * s)
     }
 
     if (!full) {

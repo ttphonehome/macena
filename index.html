@@ -16,12 +16,6 @@
     />
     <meta property="og:image" content="assets/img/macena-coast-1800.jpg" />
 
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@600;800&display=swap"
-    />
     <link rel="preload" as="image" href="assets/img/macena-coast-900.jpg" />
 
     <link rel="stylesheet" href="assets/vendor/lenis.css" />
@@ -31,6 +25,44 @@
       ;(function () {
         var root = document.documentElement
         root.classList.add("js")
+
+        // A different typeface on every load (never the same one twice in a row).
+        // Preview a specific one with ?font=inter-tight | space-grotesk | archivo | bricolage
+        var FONTS = {
+          "inter-tight": "inter-tight-800.woff2",
+          "space-grotesk": "space-grotesk-700.woff2",
+          archivo: "archivo-800.woff2",
+          bricolage: "bricolage-800.woff2",
+        }
+        var keys = Object.keys(FONTS)
+        var forced = new URLSearchParams(location.search).get("font")
+        var last = ""
+        try {
+          last = localStorage.getItem("mc-font") || ""
+        } catch (e) {}
+        var pool = keys.filter(function (k) {
+          return k !== last
+        })
+        var pick = FONTS[forced] ? forced : pool[Math.floor(Math.random() * pool.length)]
+        try {
+          localStorage.setItem("mc-font", pick)
+        } catch (e) {}
+        root.dataset.font = pick
+        var pre = document.createElement("link")
+        pre.rel = "preload"
+        pre.as = "font"
+        pre.type = "font/woff2"
+        pre.crossOrigin = "anonymous"
+        pre.href = "assets/fonts/" + FONTS[pick]
+        document.head.appendChild(pre)
+        var arrow = document.createElement("link")
+        arrow.rel = "preload"
+        arrow.as = "font"
+        arrow.type = "font/woff2"
+        arrow.crossOrigin = "anonymous"
+        arrow.href = "assets/fonts/inter-tight-arrow.woff2"
+        document.head.appendChild(arrow)
+
         // Hold the landing state until main.js plays the intro.
         // Never leave the page hidden if a script fails to load.
         if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
@@ -195,8 +227,7 @@
                 ><span class="wordmark__letter" aria-hidden="true"><span data-letter>C<span class="wordmark__probe"></span></span></span
                 ><span class="wordmark__letter" aria-hidden="true"><span data-letter>E</span></span
                 ><span class="wordmark__letter" aria-hidden="true"><span data-letter>N</span></span
-                ><span class="wordmark__letter" aria-hidden="true"><span data-letter>A</span></span
-                ><span class="wordmark__name" aria-hidden="true" data-intro-fade>JOSE</span>
+                ><span class="wordmark__letter" aria-hidden="true"><span data-letter>A</span></span>
               </h1>
             </div>
           </div>
@@ -290,10 +321,6 @@
           <span class="nav-link__roll" aria-hidden="true"><span>INSTAGRAM</span><span>INSTAGRAM</span></span>
           <span class="sr-only">Instagram (opens in a new tab)</span>
         </a>
-        <a class="nav-link" href="https://x.com/ZiBadscene" target="_blank" rel="noopener noreferrer">
-          <span class="nav-link__roll" aria-hidden="true"><span>TWITTER</span><span>TWITTER</span></span>
-          <span class="sr-only">Twitter (opens in a new tab)</span>
-        </a>
       </nav>
       <div class="wordmark-wrap footer__wordmark-wrap">
         <p class="wordmark" data-fit="MACENA" aria-label="Jose Macena">
@@ -302,8 +329,7 @@
           ><span class="wordmark__letter" aria-hidden="true"><span data-footer-letter>C<span class="wordmark__probe"></span></span></span
           ><span class="wordmark__letter" aria-hidden="true"><span data-footer-letter>E</span></span
           ><span class="wordmark__letter" aria-hidden="true"><span data-footer-letter>N</span></span
-          ><span class="wordmark__letter" aria-hidden="true"><span data-footer-letter>A</span></span
-          ><span class="wordmark__name" aria-hidden="true" data-footer-name>JOSE</span>
+          ><span class="wordmark__letter" aria-hidden="true"><span data-footer-letter>A</span></span>
         </p>
       </div>
     </footer>
