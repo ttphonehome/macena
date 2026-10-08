@@ -277,13 +277,13 @@
     // Copy: lines slide out, text swaps, new lines rise in
     const lines = (copySplit || splitCopy()).lines
     swapTl
-      .to(lines, { yPercent: -105, duration: 0.35, ease: "power2.in", stagger: 0.03 }, 0)
+      .to(lines, { yPercent: -150, duration: 0.35, ease: "power2.in", stagger: 0.03 }, 0)
       .call(() => writeCopy(next), null, 0.4)
       .add(() => {
         const fresh = splitCopy().lines
         gsap.fromTo(
           fresh,
-          { yPercent: 105 },
+          { yPercent: 150 },
           { yPercent: 0, duration: 0.8, ease: "expo.out", stagger: 0.06 },
         )
       }, 0.4)
@@ -480,10 +480,12 @@
         type: "lines",
         mask: "lines",
         linesClass: "line",
+        // keep non-breaking spaces: they tie the last two words together
+        reduceWhiteSpace: false,
         autoSplit: true,
         onSplit: (self) =>
           gsap.from(self.lines, {
-            yPercent: 105,
+            yPercent: 150,
             duration: 1.1,
             ease: "expo.out",
             stagger: 0.08,

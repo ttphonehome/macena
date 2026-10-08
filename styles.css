@@ -520,10 +520,13 @@ button {
   text-wrap: balance;
 }
 
-/* SplitText line masks: room for descenders */
+/* SplitText line masks. Each mask is exactly one line tall, so it clipped
+   descenders, accents and any glyph taller than the line box. Pad the clip
+   area on all four sides and cancel it with negative margins, so the layout
+   doesn't move. (The reveal tweens travel far enough to stay hidden.) */
 .line-mask {
-  padding-bottom: 0.1em;
-  margin-bottom: -0.1em;
+  padding: 0.25em 0.15em;
+  margin: -0.25em -0.15em;
 }
 
 .project-ui__controls {
@@ -672,7 +675,15 @@ button {
   font-size: clamp(1.6rem, 3.7vw, 4rem);
   letter-spacing: -0.01em;
   line-height: 1.03;
+  /* balance where the browser supports it (short paragraphs), pretty as the
+     fallback; the last two words are also tied together in the HTML */
   text-wrap: balance;
+}
+
+@supports not (text-wrap: balance) {
+  .about__copy {
+    text-wrap: pretty;
+  }
 }
 
 /* Desktop: portrait follows the cursor, text inverts over it */
@@ -732,7 +743,7 @@ button {
   align-items: center;
   gap: 1rem;
   min-height: clamp(4rem, 6.4vw, 6.875rem);
-  border-top: 6px solid var(--black);
+  border-top: 4px solid var(--black);
   white-space: nowrap;
   transition:
     background-color 0.3s,
@@ -926,7 +937,6 @@ button {
     column-gap: 0.75rem;
     min-height: 0;
     padding-block: 0.85rem 0.95rem;
-    border-top-width: 4px;
   }
 
   .experience__studio {
