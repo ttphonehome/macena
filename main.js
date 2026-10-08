@@ -446,20 +446,22 @@
 
   // Copy: lines rise in on scroll (all devices)
   if (!reduceMotion) {
-    SplitText.create("[data-split-lines]", {
-      type: "lines",
-      mask: "lines",
-      linesClass: "line",
-      autoSplit: true,
-      onSplit: (self) =>
-        gsap.from(self.lines, {
-          yPercent: 105,
-          duration: 1.1,
-          ease: "expo.out",
-          stagger: 0.08,
-          scrollTrigger: { trigger: self.elements[0], start: "top 82%" },
-        }),
-    })
+    for (const el of $$("[data-split-lines], [data-bio]")) {
+      SplitText.create(el, {
+        type: "lines",
+        mask: "lines",
+        linesClass: "line",
+        autoSplit: true,
+        onSplit: (self) =>
+          gsap.from(self.lines, {
+            yPercent: 105,
+            duration: 1.1,
+            ease: "expo.out",
+            stagger: 0.08,
+            scrollTrigger: { trigger: el, start: "top 88%" },
+          }),
+      })
+    }
 
     gsap.from(".about__label", {
       autoAlpha: 0,
@@ -515,7 +517,7 @@
     footerTl
       .fromTo(
         "[data-footer-letter]",
-        { yPercent: 110, rotate: 6 },
+        { yPercent: 135, rotate: 6 },
         { yPercent: 0, rotate: 0, ease: "expo.out", duration: 1.3, stagger: 0.07 },
       )
   }
@@ -786,6 +788,21 @@
 
   initWordmarkFx()
 
+  /* ------------------------------------------------------------------------
+     Footer clock: the visitor's local time, ticking every second
+     ------------------------------------------------------------------------ */
+  const clock = $("[data-clock]")
+  if (clock) {
+    const pad2 = (n) => String(n).padStart(2, "0")
+    const tick = () => {
+      const d = new Date()
+      clock.textContent = `${pad2(d.getHours())}:${pad2(d.getMinutes())}:${pad2(d.getSeconds())}`
+      clock.dateTime = d.toISOString()
+    }
+    tick()
+    setInterval(tick, 1000)
+  }
+
   const root = document.documentElement
   // Ready = the randomly chosen display font is actually loaded (3s cap)
   const fontsReady = document.fonts
@@ -846,8 +863,8 @@
     }
 
     // Hero pre-states. y: 0 discards the px offset GSAP parses from the
-    // CSS translateY(110%) pre-state, so yPercent alone drives the letters.
-    gsap.set(letters, { y: 0, yPercent: 110, rotate: 6 })
+    // CSS translateY(135%) pre-state, so yPercent alone drives the letters.
+    gsap.set(letters, { y: 0, yPercent: 135, rotate: 6 })
     gsap.set(availability, { autoAlpha: 1, clipPath: "inset(0% 100% 0% 0%)" })
     gsap.set(navLinks, { autoAlpha: 0, yPercent: -120 })
     root.classList.remove("is-loading")

@@ -14,9 +14,9 @@
       property="og:description"
       content="Brand identity and digital design. Lisbon / London."
     />
-    <meta property="og:image" content="assets/img/macena-coast-1800.jpg" />
+    <meta property="og:image" content="assets/img/work/royal-salute.webp" />
 
-    <link rel="preload" as="image" href="assets/img/macena-coast-900.jpg" />
+    <link rel="preload" as="image" href="assets/img/work/royal-salute.webp" />
 
     <link rel="stylesheet" href="assets/vendor/lenis.css" />
     <link rel="stylesheet" href="styles.css" />
@@ -26,44 +26,16 @@
         var root = document.documentElement
         root.classList.add("js")
 
-        // A different typeface on every load (never the same one twice in a row).
-        // Preview a specific one with ?font=pirata-one | syne | ultra | faculty-glyphic | unbounded | archivo
-        var FONTS = {
-          "pirata-one": "pirata-one-400.woff2",
-          syne: "syne-800.woff2",
-          ultra: "ultra-400.woff2",
-          "faculty-glyphic": "faculty-glyphic-400.woff2",
-          unbounded: "unbounded-900.woff2",
-          archivo: "archivo-800.woff2",
-        }
-        var keys = Object.keys(FONTS)
-        var forced = new URLSearchParams(location.search).get("font")
-        var last = ""
-        try {
-          last = localStorage.getItem("mc-font") || ""
-        } catch (e) {}
-        var pool = keys.filter(function (k) {
-          return k !== last
+        // Preload the display typeface so the intro never shows a fallback
+        ;["faculty-glyphic-400.woff2", "inter-tight-arrow.woff2"].forEach(function (f) {
+          var l = document.createElement("link")
+          l.rel = "preload"
+          l.as = "font"
+          l.type = "font/woff2"
+          l.crossOrigin = "anonymous"
+          l.href = "assets/fonts/" + f
+          document.head.appendChild(l)
         })
-        var pick = FONTS[forced] ? forced : pool[Math.floor(Math.random() * pool.length)]
-        try {
-          localStorage.setItem("mc-font", pick)
-        } catch (e) {}
-        root.dataset.font = pick
-        var pre = document.createElement("link")
-        pre.rel = "preload"
-        pre.as = "font"
-        pre.type = "font/woff2"
-        pre.crossOrigin = "anonymous"
-        pre.href = "assets/fonts/" + FONTS[pick]
-        document.head.appendChild(pre)
-        var arrow = document.createElement("link")
-        arrow.rel = "preload"
-        arrow.as = "font"
-        arrow.type = "font/woff2"
-        arrow.crossOrigin = "anonymous"
-        arrow.href = "assets/fonts/inter-tight-arrow.woff2"
-        document.head.appendChild(arrow)
 
         // Hold the landing state until main.js plays the intro.
         // Never leave the page hidden if a script fails to load.
@@ -94,10 +66,12 @@
           ><span data-intro-letter>S</span><span data-intro-letter>E</span></span
         >
         <div class="intro__media" data-intro-media>
-          <img src="assets/img/macena-coast-900.jpg" alt="" />
-          <img src="assets/img/work-02-900.jpg" alt="" />
-          <img src="assets/img/work-03-900.jpg" alt="" />
-          <img src="assets/img/work-04-900.jpg" alt="" />
+          <img src="assets/img/work/royal-salute.webp" alt="" />
+          <img src="assets/img/work/warba-bank.webp" alt="" />
+          <img src="assets/img/work/brewdog.webp" alt="" />
+          <img src="assets/img/work/fei.webp" alt="" />
+          <img src="assets/img/work/playground.webp" alt="" />
+          <img src="assets/img/work/bluff.webp" alt="" />
         </div>
         <span class="intro__word"
           ><span data-intro-letter>M</span><span data-intro-letter>A</span
@@ -139,48 +113,63 @@
             <div class="hero__slides" data-hero-slides>
               <img
                 class="hero__slide"
-                src="assets/img/macena-coast-900.jpg"
-                srcset="assets/img/macena-coast-900.jpg 900w, assets/img/macena-coast-1800.jpg 1800w"
-                sizes="100vw"
-                alt="Concrete architecture framing a calm blue ocean"
-                data-client="SALT HOUSE"
-                data-discipline="BRAND IDENTITY"
-                data-year="2026"
-                data-blurb="Hospitality identity shaped by concrete and horizon lines."
+                src="assets/img/work/royal-salute.webp"
+                width="1920"
+                height="1080"
+                alt="Royal Salute x Richard Quinn bottle with floral artwork"
+                data-client="ROYAL SALUTE"
+                data-blurb="Cinematic campaign visuals bringing luxury whisky and fashion together."
                 fetchpriority="high"
               />
               <img
                 class="hero__slide"
-                src="assets/img/work-02-900.jpg"
-                srcset="assets/img/work-02-900.jpg 900w, assets/img/work-02-1800.jpg 1800w"
-                sizes="100vw"
-                alt="Grey concrete building against a pale sky"
-                data-client="OBRA STUDIO"
-                data-discipline="DIGITAL DESIGN"
-                data-year="2025"
-                data-blurb="A slow, deliberate digital home for an architecture practice."
+                src="assets/img/work/warba-bank.webp"
+                width="1920"
+                height="1080"
+                alt="Fanned Warba Bank cards in purple, orange and silver"
+                data-client="WARBA BANK"
+                data-blurb="A bold, forward-looking identity for a new generation of banking."
+                loading="eager"
               />
               <img
                 class="hero__slide"
-                src="assets/img/work-03-900.jpg"
-                srcset="assets/img/work-03-900.jpg 900w, assets/img/work-03-1800.jpg 1800w"
-                sizes="100vw"
-                alt="Black and white photograph of stacked concrete blocks"
-                data-client="MONOLITH"
-                data-discipline="IDENTITY · PRINT"
-                data-year="2025"
-                data-blurb="Monochrome identity drawn from the weight of stacked blocks."
+                src="assets/img/work/brewdog.webp"
+                width="1920"
+                height="1080"
+                alt="BrewDog campaign visual"
+                data-client="BREWDOG"
+                data-blurb="An unapologetic identity and campaign celebrating those who hold their own."
+                loading="eager"
               />
               <img
                 class="hero__slide"
-                src="assets/img/work-04-900.jpg"
-                srcset="assets/img/work-04-900.jpg 900w, assets/img/work-04-1800.jpg 1800w"
-                sizes="100vw"
-                alt="Tall building rising into a blue sky"
-                data-client="ALTO"
-                data-discipline="BRAND · CAMPAIGN"
-                data-year="2024"
-                data-blurb="Launch campaign framing a tower as one upward gesture."
+                src="assets/img/work/fei.webp"
+                width="1920"
+                height="1080"
+                alt="FEI equestrian identity"
+                data-client="FEI"
+                data-blurb="Seven equestrian disciplines. One dynamic, unified identity."
+                loading="eager"
+              />
+              <img
+                class="hero__slide"
+                src="assets/img/work/playground.webp"
+                width="1920"
+                height="1080"
+                alt="Playground brand, motion and 3D exploration"
+                data-client="PLAYGROUND"
+                data-blurb="Explorations in brand, motion and 3D, where experimentation meets real-world work."
+                loading="eager"
+              />
+              <img
+                class="hero__slide"
+                src="assets/img/work/bluff.webp"
+                width="1920"
+                height="1080"
+                alt="BLUFF.COM brand world"
+                data-client="BLUFF.COM"
+                data-blurb="A premium brand world built around the atmosphere and energy of play."
+                loading="eager"
               />
             </div>
 
@@ -197,9 +186,9 @@
               </div>
 
               <div class="project-ui__copy" aria-live="polite" aria-atomic="true">
-                <p class="project-ui__client" data-client-out>SALT HOUSE</p>
+                <p class="project-ui__client" data-client-out>ROYAL SALUTE</p>
                 <p class="project-ui__blurb" data-blurb-out>
-                  Hospitality identity shaped by concrete and horizon lines.
+                  Cinematic campaign visuals bringing luxury whisky and fashion together.
                 </p>
               </div>
 
@@ -209,7 +198,7 @@
                   <img src="assets/icons/chevron.svg" alt="" width="111" height="72" />
                   <span class="sr-only">Previous project</span>
                 </button>
-                <p class="project-ui__count" data-count>1/4</p>
+                <p class="project-ui__count" data-count>1/6</p>
                 <button type="button" class="project-ui__btn project-ui__btn--next" data-next>
                   <img src="assets/icons/chevron.svg" alt="" width="111" height="72" />
                   <span class="sr-only">Next project</span>
@@ -239,13 +228,19 @@
       <!-- ABOUT -->
       <section class="about" id="about" aria-labelledby="about-label" data-about>
         <div class="about__portrait" aria-hidden="true" data-portrait>
-          <img src="assets/img/portrait-800.jpg" alt="" width="800" height="1000" loading="lazy" />
+          <img src="assets/img/profile.webp" alt="" width="886" height="886" loading="lazy" />
         </div>
         <h2 class="about__label" id="about-label">ABOUT</h2>
         <p class="about__copy" data-split-lines>
           I’m a Design Director working across brand identity and digital design. I help
           businesses figure out who they are, build the visual system around it, and carry it
           through every touchpoint.
+        </p>
+        <p class="about__bio" data-bio>
+          José is a London-based designer working across branding, typography, and art direction.
+          His work focuses on building clear, characterful visual identities. Recent collaborations
+          include Bluff, Royal Salute, Warba Bank, UEFA, Premier League, White Claw, FEI and Brewdog,
+          among others.
         </p>
       </section>
 
@@ -254,11 +249,14 @@
         <h2 class="experience__label" id="experience-label">EXPERIENCE</h2>
         <ul class="experience__list" data-experience>
           <li>
-            <a class="experience__row" href="https://www.superduper.xyz/" target="_blank" rel="noopener noreferrer">
+            <div class="experience__row experience__row--multi">
               <span class="experience__role">Lead Designer</span>
-              <span class="experience__studio">Superduper</span>
+              <span class="experience__studio"
+                ><a href="https://www.superduper.xyz/" target="_blank" rel="noopener noreferrer">Superduper</a
+                >/<a href="https://www.playlink.com/" target="_blank" rel="noopener noreferrer">Playlink</a></span
+              >
               <span class="experience__years">2026</span>
-            </a>
+            </div>
           </li>
           <li>
             <a class="experience__row" href="https://www.wearegirlandbear.com/" target="_blank" rel="noopener noreferrer">
@@ -332,6 +330,22 @@
           ><span class="wordmark__letter" aria-hidden="true"><span data-footer-letter>E</span></span
           ><span class="wordmark__letter" aria-hidden="true"><span data-footer-letter>N</span></span
           ><span class="wordmark__letter" aria-hidden="true"><span data-footer-letter>A</span></span>
+        </p>
+      </div>
+      <div class="footer__meta">
+        <p>
+          Site by
+          <a href="https://www.tomaslouro.net" target="_blank" rel="noopener noreferrer">Tomás Louro</a>
+        </p>
+        <p><time data-clock datetime="">00:00:00</time></p>
+        <p>
+          Colophon:
+          <a
+            href="https://fonts.google.com/specimen/Faculty+Glyphic"
+            target="_blank"
+            rel="noopener noreferrer"
+            >Faculty Glyphic</a
+          >
         </p>
       </div>
     </footer>
