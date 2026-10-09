@@ -841,13 +841,21 @@ button {
   top: var(--pad);
   left: var(--pad);
   right: var(--pad);
-  display: flex;
-  justify-content: space-between; /* LinkedIn left, Instagram right */
+  display: grid;
+  grid-template-columns: 1fr auto 1fr; /* LinkedIn left, Contact centre, Instagram right */
   gap: 1rem;
-  align-items: flex-start;
+  align-items: start;
   font-size: var(--fs-nav);
   letter-spacing: -0.02em;
   line-height: 1;
+}
+
+.footer__nav > :nth-child(2) {
+  justify-self: center;
+}
+
+.footer__nav > :last-child {
+  justify-self: end;
 }
 
 /* ==========================================================================
@@ -857,6 +865,7 @@ button {
 @media (max-width: 767px) {
   :root {
     --pad: 1rem;
+    --fs-nav: calc(0.95rem * 1.05); /* nav + ABOUT label: +5% */
   }
 
   /* Hero: shorter travel, larger preview so the first screen isn't empty */
@@ -872,7 +881,10 @@ button {
   }
 
   .availability {
-    margin-bottom: 0.5rem;
+    /* ~44px-tall tap area around the 12px text, layout unchanged */
+    padding: 0.95rem 0.7rem;
+    margin: -0.95rem -0.7rem -0.45rem;
+    background-origin: content-box; /* hover underline stays under the text */
     font-size: 0.75rem;
   }
 
@@ -889,11 +901,11 @@ button {
   }
 
   .project-ui__client {
-    font-size: 0.875rem;
+    font-size: calc(0.875rem * 1.05);
   }
 
   .project-ui__blurb {
-    font-size: clamp(1.5rem, 7.2vw, 2.1rem);
+    font-size: clamp(1.35rem, 6.48vw, 1.89rem); /* -10% */
     line-height: 1.02;
   }
 
@@ -917,7 +929,7 @@ button {
   }
 
   .about__copy {
-    font-size: clamp(1.5rem, 7.4vw, 2.2rem);
+    font-size: clamp(1.35rem, 6.66vw, 1.98rem); /* -10% */
   }
 
   /* Experience: studio leads, years right, role as a quiet second line */
@@ -928,7 +940,7 @@ button {
   }
 
   .experience__label {
-    font-size: 0.95rem;
+    font-size: calc(0.95rem * 1.05);
   }
 
   .experience__row {
@@ -973,7 +985,7 @@ button {
 
   .footer__nav {
     position: static;
-    font-size: 0.8rem;
+    font-size: calc(0.8rem * 1.05);
   }
 
   /* Two stacked pairs, no clock: "SITE BY / TOMÁS LOURO" left,
